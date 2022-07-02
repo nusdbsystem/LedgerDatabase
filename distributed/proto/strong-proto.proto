@@ -1,0 +1,174 @@
+syntax = "proto2";
+
+import "common-proto.proto";
+
+package strongstore.proto;
+
+message GetMessage {
+    required string key = 1;
+    optional TimestampMessage timestamp = 2;
+}
+
+message PrepareMessage {
+    required TransactionMessage txn = 1;
+    optional uint64 timestamp = 2;
+}
+
+message CommitMessage {
+    required uint64 timestamp = 1;
+}
+
+message AbortMessage {
+    required TransactionMessage txn = 1;
+}
+
+message VerifyMessage {
+  optional int64 block = 1;
+  repeated bytes keys = 2;
+}
+
+message AuditMessage {
+  optional int64 seq = 1;
+}
+
+message VersionMessage {
+  message VersionedKey {
+    optional string key = 1;
+    optional int32 nversions = 2;
+  }
+  repeated VersionedKey versionedKeys = 1;
+}
+
+message RangeMessage {
+  optional string from = 1;
+  optional string to = 2;
+}
+
+message BatchGetMessage {                                                       
+    repeated string keys = 1;                                                   
+    optional TimestampMessage timestamp = 2;                                       
+}
+
+message Request {
+     enum Operation {
+          GET = 1;
+          PREPARE = 2;
+          COMMIT = 3;
+          ABORT = 4;
+          VERIFY_GET = 5;
+          RANGE = 6;
+          BATCH_GET = 7;
+          AUDIT = 8;
+     }
+     required Operation op = 1;
+     required uint64 txnid = 2;
+     optional GetMessage get = 3;
+     optional PrepareMessage prepare = 4;
+     optional CommitMessage commit = 5;
+     optional AbortMessage abort = 6;
+     optional VerifyMessage verify = 7;
+     optional VersionMessage version = 8;
+     optional RangeMessage range = 10;
+     optional BatchGetMessage batchget = 11;
+     optional AuditMessage audit = 12;
+}
+
+message LedgerDBProof {
+    optional bytes val = 1;
+    optional bytes hash = 2;
+    repeated bytes proof = 3;
+    repeated int32 mt_pos = 4;
+    optional bytes mptvalue = 5;
+    repeated bytes mpt_chunks = 6;
+    repeated int32 mpt_pos = 7;
+}
+
+message QLDBProof {
+    optional bytes key = 1;
+    optional bytes value = 2;
+    optional uint64 blockno = 3;
+    optional uint64 doc_seq = 4;
+    optional uint64 version = 5;
+    optional uint64 time = 6;
+    repeated bytes hashes = 7;
+    repeated int32 pos = 8;
+}
+
+message MTProof {
+    optional bytes digest = 1;
+    optional bytes value = 2;
+    repeated bytes proof = 3;
+    repeated int32 pos = 4;
+}
+
+message MPTProof {
+    optional bytes value = 1;
+    repeated bytes chunks = 2;
+    repeated int32 pos = 3;
+}
+
+message SQLLedgerProof {
+    optional MTProof blk_proof = 1;
+    optional MTProof txn_proof = 2;
+    repeated bytes blocks = 3;
+    optional bytes digest = 4;
+}
+
+message Range {
+    optional int32 start = 1;
+    optional int32 end = 2;
+}
+
+message USTOREProof {
+    repeated bytes value = 1;
+    repeated bytes list_chunks = 2;
+    repeated int32 list_pos = 3;
+    repeated bytes map_chunks = 4;
+    repeated int32 map_pos = 5;
+    repeated bytes keys = 6;
+    repeated Range ranges = 7;
+}
+
+message Reply {
+     // 0 = OK
+     // -1 = failed
+     // -2 = retry
+     // -3 = abstain/no reply
+    message Digest {
+        optional int64 block = 1;
+        optional bytes hash = 2;
+        optional bytes mptHash = 3;
+    }
+    message KV {
+        optional string key = 1;
+        optional string val = 2;
+        optional int64 estimate_block = 3;
+    }
+    message SQLLedgerAudit {
+        optional int64 block_no = 1;
+        optional bytes digest = 2;
+        optional bytes txns = 3;
+        repeated bytes blocks = 4;
+    }
+    message LedgerDBAudit {
+        optional bytes digest = 1;
+        optional int64 commit_seq = 2;
+        optional int64 first_block_seq = 3;
+        repeated bytes commits = 4;
+        repeated bytes blocks = 5;
+        repeated MPTProof mptproofs = 6;
+    }
+    required int32 status = 1;
+    optional string value = 2;
+    optional int64 timestamp = 3;
+    optional Digest digest = 4;
+    repeated KV values = 5;
+    repeated int64 timestamps = 6;
+    optional USTOREProof uproof = 7;
+    repeated QLDBProof qproof = 8;
+    repeated LedgerDBProof proof = 9;
+    repeated bytes blockdata = 10;
+    repeated SQLLedgerProof sproof = 11;
+    optional SQLLedgerAudit saudit = 12;
+    optional LedgerDBAudit laudit = 13;
+}
