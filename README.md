@@ -1,5 +1,5 @@
 # Ledger Database
-In this repository, we emulate Amazon's Quantumn Ledger Database and Alibaba's LedgerDB.
+This repository includes the implementations of QLDB and LedgerDB, which are used in the paper "[GlassDB: Practical Verifiable Ledger Database Through Transparency](http://arxiv.org/abs/2207.00944)". 
 
 ## Dependency
 * rocksdb (&geq; 5.8)
