@@ -175,7 +175,7 @@ VRReplica::RequestStateTransfer()
     this->lastRequestStateTransferView = view;
     this->lastRequestStateTransferOpnum = lastCommitted;
 
-    if (!transport->SendMessageToAll(this, m)) {
+    if (!transport->SendMessageToAll(this, m, true)) {
         RWarning("Failed to send RequestStateTransfer message to all replicas");
     }
 }
@@ -218,7 +218,7 @@ VRReplica::StartViewChange(view_t newview)
     m.set_replicaidx(myIdx);
     m.set_lastcommitted(lastCommitted);
 
-    if (!transport->SendMessageToAll(this, m)) {
+    if (!transport->SendMessageToAll(this, m, true)) {
         RWarning("Failed to send StartViewChange message to all replicas");
     }
 }
@@ -232,7 +232,7 @@ VRReplica::SendNullCommit()
 
     ASSERT(AmLeader());
 
-    if (!(transport->SendMessageToAll(this, cm))) {
+    if (!(transport->SendMessageToAll(this, cm, true))) {
         RWarning("Failed to send null COMMIT message to all replicas");
     }
 }
@@ -260,7 +260,7 @@ VRReplica::ResendPrepare()
     if (lastOp == lastCommitted) {
         return;
     }
-    if (!(transport->SendMessageToAll(this, lastPrepare))) {
+    if (!(transport->SendMessageToAll(this, lastPrepare, true))) {
         RWarning("Failed to ressend prepare message to all replicas");
     }
 }
@@ -289,7 +289,7 @@ VRReplica::CloseBatch()
     }
     lastPrepare = p;
 
-    if (!(transport->SendMessageToAll(this, p))) {
+    if (!(transport->SendMessageToAll(this, p, true))) {
         RWarning("Failed to send prepare message to all replicas");
     }
     lastBatchEnd = lastOp;
@@ -579,7 +579,7 @@ VRReplica::HandlePrepareOK(const TransportAddress &remote,
         cm.set_view(this->view);
         cm.set_opnum(this->lastCommitted);
 
-        if (!(transport->SendMessageToAll(this, cm))) {
+        if (!(transport->SendMessageToAll(this, cm, true))) {
             RWarning("Failed to send COMMIT message to all replicas");
         }
 
@@ -874,7 +874,7 @@ VRReplica::HandleDoViewChange(const TransportAddress &remote,
         
         log.Dump(minCommitted, sv.mutable_entries());
 
-        if (!(transport->SendMessageToAll(this, sv))) {
+        if (!(transport->SendMessageToAll(this, sv, true))) {
             RWarning("Failed to send StartView message to all replicas");
         }
     }    

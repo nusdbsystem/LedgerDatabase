@@ -81,7 +81,7 @@ VRClient::SendRequest(const PendingRequest *req)
     reqMsg.mutable_req()->set_clientreqid(req->clientReqId);
 
     //    // XXX Try sending only to (what we think is) the leader first
-    if (transport->SendMessageToAll(this, reqMsg)) {
+    if (transport->SendMessageToAll(this, reqMsg, false)) {
         req->timer->Reset();
     } else {
         Warning("Could not send request to replicas.");
