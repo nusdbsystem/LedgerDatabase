@@ -20,7 +20,7 @@ This repository includes the implementations of QLDB and LedgerDB, which are use
 * gcc (&geq; 5.5)
 
 ## Setup
-1. In `exps/env.sh`, fill in project root directory and master node ip address (where experiments will be started, usually should be current machine).
+1. In `exps/env.sh`, fill in project root directory, master node ip address (where experiments will be started, usually should be current machine), and init data file path if any.
 2. List server IP addresses in `exps/replicas`, client IP address in `exps/clients`, and timeservers IP address in `exps/timeservers`.
 3. Build the cluster on all machines with the scripts provided
 
@@ -39,7 +39,7 @@ $ ./build.sh qldb
 Make sure the parent folder of project root directory is available on all machines.
 
 ## Run experiments
-1. Configure experiment settings in `exps/run_all.sh`.
+1. Configure experiment settings in `exps/run_exp.sh`.
 
 All client nodes specified in `exps/clients` will spawn client processes when running experiments.
 You can specify client process started per client node (nclients) to control the total number of client processes.
@@ -50,10 +50,10 @@ You can specify nshards to control the number of servers spawned for the experim
 
 ```
 $ cd exps
-$ ./run_all.sh
+$ ./run_exp.sh
 ```
 3. Check throughput, latency and abort rate in `exps/result/tps_<wperc>_<theta>`,
-where `<wperc>` and `<theta>` are write percentage and Zipf factor specified in `exps/run_all.sh`
+where `<wperc>` and `<theta>` are write percentage and Zipf factor specified in `exps/run_exp.sh`
 
 ### Example results
 Experiment setting
