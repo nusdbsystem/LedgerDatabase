@@ -116,6 +116,9 @@ SkipNode SkipList::makeNode (int key, std::string val, int level) {
 std::string SkipList::find(const std::string& prefix, long searchKey) {
   std::string headstr;
   db_->Get(prefix + "|head", &headstr);
+  if (headstr.size() == 0) {
+    return "";
+  }
   SkipNode head(headstr);
   if (head.key == searchKey) {
     return headstr;
