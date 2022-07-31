@@ -1,8 +1,10 @@
 if [ $(echo "$1" | awk '{print tolower($0)}') == 'qldb' ]
 then
-  flag=OFF
+  qldbopt=ON
+  ledgerdbopt=OFF
 else
-  flag=ON
+  qldbopt=OFF
+  ledgerdbopt=ON
 fi
 
 . env.sh
@@ -10,5 +12,5 @@ fi
 for host in `cat clients timeservers replicas`
 do
   echo ${host}
-  ssh ${host} "source ~/.profile; source ~/.bashrc; mkdir -p ${rootdir}/build; cd ${rootdir}/build; rm -rf *; cmake -DLEDGERDB=${flag} ..; make -j6;" &
+  ssh ${host} "source ~/.profile; source ~/.bashrc; mkdir -p ${rootdir}/build; cd ${rootdir}/build; rm -rf *; cmake -DLEDGERDB=${ledgerdbopt} -DAMZQLDB=${qldbopt} ..; make -j6;" &
 done
