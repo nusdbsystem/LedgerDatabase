@@ -19,6 +19,7 @@ clients=`cat clients`
 client="verifyClient"
 store="strongstore"
 mode="occ"
+txnrate=120
 
 # Print out configuration being used.
 echo "Configuration:"
@@ -39,7 +40,7 @@ for ((i=0; i<$nshard; i++))
 do
   echo "Starting shard$i replicas.."
   $expdir/start_replica.sh shard$i $expdir/shard$i.config \
-    "$bindir/$store -m $mode -e 0 -s 0 -N $nshard -n $i -k 100000" $logdir
+    "$bindir/$store -m $mode -e 0 -s 0 -N $nshard -n $i -w ycsb -k 100000" $logdir
 done
 
 # Wait a bit for all replicas to start up
@@ -52,7 +53,7 @@ for host in ${clients[@]}
 do
   ssh $host "source ~/.profile; source ~/.bashrc; mkdir -p $logdir; $expdir/start_client.sh \"$bindir/$client \
   -c $expdir/shard -N $nshard \
-  -d $rtime -l $tlen -w $wper -g $rper -m $mode -e 0 -s 0 -z $zalpha -t $delay\" \
+  -d $rtime -l $tlen -w $wper -g $rper -m $mode -e 0 -s 0 -z $zalpha -t $delay -x $txnrate\" \
   $count $nclient $logdir"
 
   let count=$count+$nclient
@@ -75,16 +76,17 @@ do
 done
 
 # Measure Throughput, Latency, Abort rate
+mkdir -p $expdir/result
 for host in ${clients[@]}
 do
   echo $host
   ssh $host "cat $logdir/client.*.log | sort -g -k 3 > $logdir/client.log; \
              rm -f $logdir/client.*.log; mkdir -p $expdir/result; \
-             python $expdir/process_logs.py $logdir/client.log $rtime $expdir/result/${wper}_${nshard}_${nclient}_${zalpha};
+             source ~/.profile; python $expdir/process_logs.py $logdir/client.log $rtime $expdir/result/${wper}_${nshard}_${nclient}_${zalpha};
              rsync $expdir/result/${wper}_${nshard}_${nclient}_${zalpha} ${master}:$expdir/result/client.$host.log;"
 done
 
 echo "Processing logs"
-ssh ${master} "python $expdir/aggregate.py $expdir/result $expdir/result/${wper}_${nshard}_${nclient}_${zalpha}; \
+ssh ${master} "source ~/.profile; python $expdir/aggregate.py $expdir/result $expdir/result/${wper}_${nshard}_${nclient}_${zalpha}; \
                rm -f $expdir/result/client.*.log;"
 

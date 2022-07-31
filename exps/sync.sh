@@ -13,5 +13,4 @@ for host in `cat clients`
 do
   echo $host
   rsync -a --exclude '*result' $copy_from $host:$copy_to
-  rsync transportcommon.h $host:${srcdir}/lib/
 done
