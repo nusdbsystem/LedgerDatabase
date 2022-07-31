@@ -1,10 +1,13 @@
 #===== Parameters to Fill =====
 
 # project root directory
-rootdir=""
+rootdir=
 
 # master node ip address
-master=10.0.0.40
+master=
+
+# init file directory
+initfile=
 
 #==============================
 

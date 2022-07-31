@@ -11,7 +11,7 @@ for client in `cat clients`
 do
   echo ${client}
   rsync -a ${expdir} ${client}:${rootdir}/
-  ssh ${client} "killall -9 verifyClient; rm -rf ${logdir};"
+  ssh ${client} "killall -9 verifyClient; killall -9 tpccClient; rm -rf ${logdir};"
 done
 
 for host in `cat timeservers`
