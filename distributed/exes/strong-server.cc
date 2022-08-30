@@ -36,28 +36,10 @@ Server::LeaderUpcall(opnum_t opnum, const string &str1, bool &replicate, string 
     Request request;
     Reply reply;
     int status = 0;
-    
+
     request.ParseFromString(str1);
 
     switch (request.op()) {
-    case strongstore::proto::Request::BATCH_GET:                               
-    {                                                                           
-        //std::cout << "read ";                                                                                                                                                                       
-        std::vector<std::string> keys;                                          
-        for (size_t i = 0; i < request.batchget().keys_size(); ++i) {           
-          keys.push_back(request.batchget().keys(i));                           
-        }                                                                       
-        status = store->BatchGet(request.txnid(), keys, &reply);                                                                                  
-                                                                                
-        if (status == 0) {                                                      
-            replicate = true;                                                   
-        } else {                                                                
-            replicate = false;                                                  
-        }                                                                       
-        reply.set_status(status);                                               
-        reply.SerializeToString(&str2);                                         
-        break;                                                                  
-    }
     case strongstore::proto::Request::PREPARE:
     {
         //std::cout << "prepare ";
@@ -110,7 +92,7 @@ Server::LeaderUpcall(opnum_t opnum, const string &str1, bool &replicate, string 
     }
 }
 
-/* 
+/*
  * Dummy function. No replication supported for now
  */
 void
@@ -121,7 +103,7 @@ Server::ReplicaUpcall(opnum_t opnum,
     Request request;
     Reply reply;
     int status = 0;
-    
+
     request.ParseFromString(str1);
 
     switch (request.op()) {
@@ -148,7 +130,13 @@ Server::UnloggedUpcall(const string &str1, string &str2)
   int status = 0;
   request.ParseFromString(str1);
 
-  if (request.op() == strongstore::proto::Request::VERIFY_GET) {
+  if (request.op() == strongstore::proto::Request::BATCH_GET) {
+    std::vector<std::string> keys;
+    for (size_t i = 0; i < request.batchget().keys_size(); ++i) {
+      keys.push_back(request.batchget().keys(i));
+    }
+    status = store->BatchGet(request.txnid(), keys, &reply);
+  } else if (request.op() == strongstore::proto::Request::VERIFY_GET) {
     std::map<uint64_t, std::vector<std::string>> keys;
     std::vector<std::string> data;
     for (size_t i = 0; i < request.verify().keys_size(); ++i) {
@@ -197,7 +185,7 @@ main(int argc, char **argv)
         case 'c':
             configPath = optarg;
             break;
-            
+
         case 'i':
         {
             char *strtolPtr;
@@ -208,7 +196,7 @@ main(int argc, char **argv)
             }
             break;
         }
-        
+
         case 'm':
         {
             if (strcasecmp(optarg, "lock") == 0) {

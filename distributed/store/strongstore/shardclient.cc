@@ -71,13 +71,18 @@ ShardClient::BatchGet(uint64_t id, const std::vector<std::string> &keys,
   }
   request.SerializeToString(&request_str);
 
+  int timeout = 100000;
   transport->Timer(0, [=]() {
     waiting = promise;
-    client->Invoke(request_str,
-                   bind(&ShardClient::BatchGetCallback,
-                     this,
-                     placeholders::_1,
-                     placeholders::_2));
+    client->InvokeUnlogged(replica,
+                           request_str,
+                           bind(&ShardClient::BatchGetCallback,
+                            this,
+                            placeholders::_1,
+                            placeholders::_2),
+                           bind(&ShardClient::GetTimeout,
+                            this),
+                           timeout);
   });
 }
 

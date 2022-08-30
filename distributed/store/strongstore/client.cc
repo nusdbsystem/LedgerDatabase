@@ -156,7 +156,7 @@ int Client::BatchGet(std::map<std::string, std::string>& values) {
   vector<Promise *> promises;
 
   for (auto p : participants) {
-    promises.push_back(new Promise(PREPARE_TIMEOUT));
+    promises.push_back(new Promise(GET_TIMEOUT));
     bclient[p]->BatchGet(promises.back());
   }
 
