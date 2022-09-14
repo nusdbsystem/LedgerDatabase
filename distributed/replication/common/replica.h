@@ -2,11 +2,11 @@
 #define _COMMON_REPLICA_H_
 
 
-#include "lib/configuration.h"
-#include "replication/common/log.h"
-#include "proto/request.pb.h"
-#include "lib/transport.h"
-#include "replication/common/viewstamp.h"
+#include "distributed/lib/configuration.h"
+#include "distributed/replication/common/log.h"
+#include "distributed/proto/request.pb.h"
+#include "distributed/lib/transport.h"
+#include "distributed/replication/common/viewstamp.h"
 
 namespace replication {
     

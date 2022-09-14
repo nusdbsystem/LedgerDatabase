@@ -1,4 +1,4 @@
-#include "store/strongstore/occstore.h"
+#include "distributed/store/strongstore/occstore.h"
 
 namespace strongstore {
 

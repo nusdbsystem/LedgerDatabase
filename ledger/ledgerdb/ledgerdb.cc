@@ -128,7 +128,7 @@ uint64_t LedgerDB::Set(const std::vector<std::string> &keys,
     mpt_ks.push_back(keys[i]);
     sl_->insert("skiplist_" + keys[i], timestamp,
         blk_seq_str + "@" + values[i]);
-    skiplist_head_.emplace(keys[i], timestamp);
+    skiplist_head_[keys[i]] = timestamp;
   }
 
   tree_queue_.push({blk_seq, mpt_ks, ts_str});

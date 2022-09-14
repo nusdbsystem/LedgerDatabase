@@ -1,11 +1,11 @@
 #ifndef _STRONG_OCC_STORE_H_
 #define _STRONG_OCC_STORE_H_
 
-#include "lib/assert.h"
-#include "lib/message.h"
-#include "store/common/backend/versionstore.h"
-#include "store/common/backend/txnstore.h"
-#include "store/common/transaction.h"
+#include "distributed/lib/assert.h"
+#include "distributed/lib/message.h"
+#include "distributed/store/common/backend/versionstore.h"
+#include "distributed/store/common/backend/txnstore.h"
+#include "distributed/store/common/transaction.h"
 
 #include <map>
 #include <vector>

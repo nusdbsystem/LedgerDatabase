@@ -1,9 +1,9 @@
 #ifndef _TXN_CLIENT_H_
 #define _TXN_CLIENT_H_
 
-#include "store/common/promise.h"
-#include "store/common/timestamp.h"
-#include "store/common/transaction.h"
+#include "distributed/store/common/promise.h"
+#include "distributed/store/common/timestamp.h"
+#include "distributed/store/common/transaction.h"
 
 #include <string>
 

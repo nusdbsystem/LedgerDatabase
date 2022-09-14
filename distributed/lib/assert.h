@@ -10,7 +10,7 @@
 #include <assert.h>
 #include <stdlib.h>
 #include <stdio.h>
-#include "lib/message.h"
+#include "distributed/lib/message.h"
 
 #define ASSERT(x) Assert(x)
 

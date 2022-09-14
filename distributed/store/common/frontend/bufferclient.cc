@@ -1,4 +1,4 @@
-#include "store/common/frontend/bufferclient.h"
+#include "distributed/store/common/frontend/bufferclient.h"
 
 using namespace std;
 
@@ -18,6 +18,7 @@ BufferClient::Begin(uint64_t tid)
     this->tid = tid;
     txnclient->Begin(tid);
     history.clear();
+    buffer.clear();
 }
 
 void

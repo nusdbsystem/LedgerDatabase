@@ -1,12 +1,6 @@
-INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR})
-INCLUDE_DIRECTORIES(${CMAKE_BINARY_DIR}/ledger)
-
-SET(Protobuf_IMPORT_DIRS "${CMAKE_CURRENT_SOURCE_DIR}")
 FILE(GLOB dist_proto "proto/*.proto")
 protobuf_generate_cpp(dist_proto_srcs dist_proto_hdrs ${dist_proto})
-LIST(APPEND dist_srcs ${dist_proto_srcs} ${dist_proto_hdrs})
-# MESSAGE(STATUS ${dist_srcs})
-# MESSAGE(STATUS ${CMAKE_BINARY_DIR})
+LIST(APPEND dist_srcs ${dist_proto_srcs})
 
 ADD_CUSTOM_TARGET(
   copy_dist_protobuf ALL

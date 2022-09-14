@@ -9,9 +9,9 @@
 #ifndef _CLIENT_API_H_
 #define _CLIENT_API_H_
 
-#include "lib/assert.h"
-#include "lib/message.h"
-#include "store/common/promise.h"
+#include "distributed/lib/assert.h"
+#include "distributed/lib/message.h"
+#include "distributed/store/common/promise.h"
 
 #include <string>
 #include <vector>

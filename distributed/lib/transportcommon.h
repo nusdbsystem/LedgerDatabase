@@ -1,9 +1,9 @@
 #ifndef _LIB_TRANSPORTCOMMON_H_
 #define _LIB_TRANSPORTCOMMON_H_
 
-#include "lib/assert.h"
-#include "lib/configuration.h"
-#include "lib/transport.h"
+#include "distributed/lib/assert.h"
+#include "distributed/lib/configuration.h"
+#include "distributed/lib/transport.h"
 
 #include <map>
 #include <unordered_map>

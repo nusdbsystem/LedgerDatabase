@@ -1,4 +1,4 @@
-#include "store/strongstore/server.h"
+#include "distributed/store/strongstore/server.h"
 
 namespace strongstore {
 
@@ -131,6 +131,7 @@ Server::UnloggedUpcall(const string &str1, string &str2)
   request.ParseFromString(str1);
 
   if (request.op() == strongstore::proto::Request::BATCH_GET) {
+    //std::cout << "batch_get ";
     std::vector<std::string> keys;
     for (size_t i = 0; i < request.batchget().keys_size(); ++i) {
       keys.push_back(request.batchget().keys(i));
@@ -426,6 +427,7 @@ main(int argc, char **argv)
         if (ks.size() > 0) {
             server.Load(ks, vs, Timestamp());
         }
+        std::cout << "Loaded " << cnt << " keys" << std::endl;
       }
     } else {
       std::cout << "No proper workload selected!!!" << std::endl;

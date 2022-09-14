@@ -1,6 +1,6 @@
-#include "lib/assert.h"
-#include "lib/configuration.h"
-#include "lib/message.h"
+#include "distributed/lib/assert.h"
+#include "distributed/lib/configuration.h"
+#include "distributed/lib/message.h"
 
 #include <cstring>
 #include <stdexcept>

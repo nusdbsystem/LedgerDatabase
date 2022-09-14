@@ -9,7 +9,7 @@
 #ifndef _TRUETIME_H_
 #define _TRUETIME_H_
 
-#include "lib/message.h"
+#include "distributed/lib/message.h"
 
 #include <sys/time.h>
 #include <cstdlib>

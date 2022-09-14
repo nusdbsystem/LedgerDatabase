@@ -1,16 +1,16 @@
 #ifndef _STRONG_CLIENT_H_
 #define _STRONG_CLIENT_H_
 
-#include "lib/assert.h"
-#include "lib/message.h"
-#include "lib/configuration.h"
-#include "lib/tcptransport.h"
-#include "replication/vr/client.h"
-#include "store/common/frontend/bufferclient.h"
-#include "store/common/frontend/client.h"
-#include "store/common/truetime.h"
-#include "store/strongstore/shardclient.h"
-#include "proto/strong-proto.pb.h"
+#include "distributed/lib/assert.h"
+#include "distributed/lib/message.h"
+#include "distributed/lib/configuration.h"
+#include "distributed/lib/tcptransport.h"
+#include "distributed/replication/vr/client.h"
+#include "distributed/store/common/frontend/bufferclient.h"
+#include "distributed/store/common/frontend/client.h"
+#include "distributed/store/common/truetime.h"
+#include "distributed/store/strongstore/shardclient.h"
+#include "distributed/proto/strong-proto.pb.h"
 
 #include <set>
 #include <thread>

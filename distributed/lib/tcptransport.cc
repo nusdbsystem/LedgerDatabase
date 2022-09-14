@@ -1,7 +1,7 @@
-#include "lib/assert.h"
-#include "lib/configuration.h"
-#include "lib/message.h"
-#include "lib/tcptransport.h"
+#include "distributed/lib/assert.h"
+#include "distributed/lib/configuration.h"
+#include "distributed/lib/message.h"
+#include "distributed/lib/tcptransport.h"
 
 #include <google/protobuf/message.h>
 #include <event2/thread.h>

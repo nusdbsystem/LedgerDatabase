@@ -1,7 +1,7 @@
-#include "replication/common/client.h"
-#include "proto/request.pb.h"
-#include "lib/message.h"
-#include "lib/transport.h"
+#include "distributed/replication/common/client.h"
+#include "distributed/proto/request.pb.h"
+#include "distributed/lib/message.h"
+#include "distributed/lib/transport.h"
 
 #include <random>
 

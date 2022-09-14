@@ -1,5 +1,3 @@
-INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR})
-
 AUX_SOURCE_DIRECTORY(common common_srcs)
 LIST(APPEND ledger_srcs ${common_srcs})
 

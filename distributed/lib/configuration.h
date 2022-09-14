@@ -1,7 +1,7 @@
 #ifndef _LIB_CONFIGURATION_H_
 #define _LIB_CONFIGURATION_H_
 
-#include "replication/common/viewstamp.h"
+#include "distributed/replication/common/viewstamp.h"
 
 #include <fstream>
 #include <stdbool.h>

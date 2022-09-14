@@ -1,14 +1,14 @@
 #ifndef _VERSIONED_KV_STORE_H_
 #define _VERSIONED_KV_STORE_H_
 
-#include "lib/assert.h"
-#include "lib/message.h"
-#include "store/common/timestamp.h"
-#include "store/common/backend/type.h"
+#include "distributed/lib/assert.h"
+#include "distributed/lib/message.h"
+#include "distributed/store/common/timestamp.h"
+#include "distributed/store/common/backend/type.h"
 #include "ledger/ledgerdb/ledgerdb.h"
 #include "ledger/qldb/qldb.h"
 #include "ledger/qldb/bplus_config.h"
-#include "proto/strong-proto.pb.h"
+#include "distributed/proto/strong-proto.pb.h"
 
 #include "tbb/concurrent_hash_map.h"
 #include <set>

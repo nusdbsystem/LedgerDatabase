@@ -1,10 +1,10 @@
-#include "replication/common/client.h"
-#include "proto/request.pb.h"
-#include "lib/assert.h"
-#include "lib/message.h"
-#include "lib/transport.h"
-#include "replication/vr/client.h"
-#include "proto/vr-proto.pb.h"
+#include "distributed/replication/common/client.h"
+#include "distributed/proto/request.pb.h"
+#include "distributed/lib/assert.h"
+#include "distributed/lib/message.h"
+#include "distributed/lib/transport.h"
+#include "distributed/replication/vr/client.h"
+#include "distributed/proto/vr-proto.pb.h"
 
 namespace replication {
 namespace vr {

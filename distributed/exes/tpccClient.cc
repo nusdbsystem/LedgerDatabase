@@ -2,9 +2,9 @@
 #include <future>
 #include "tbb/concurrent_queue.h"
 #include "tbb/concurrent_hash_map.h"
-#include "store/common/truetime.h"
-#include "store/common/frontend/client.h"
-#include "store/strongstore/client.h"
+#include "distributed/store/common/truetime.h"
+#include "distributed/store/common/frontend/client.h"
+#include "distributed/store/strongstore/client.h"
 #include "boost/algorithm/string.hpp"
 
 using namespace std;

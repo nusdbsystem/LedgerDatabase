@@ -2,11 +2,11 @@
 #define _STRONG_SERVER_H_
 
 #include <vector>
-#include "lib/tcptransport.h"
-#include "replication/vr/replica.h"
-#include "store/common/truetime.h"
-#include "store/strongstore/occstore.h"
-#include "proto/strong-proto.pb.h"
+#include "distributed/lib/tcptransport.h"
+#include "distributed/replication/vr/replica.h"
+#include "distributed/store/common/truetime.h"
+#include "distributed/store/strongstore/occstore.h"
+#include "distributed/proto/strong-proto.pb.h"
 
 namespace strongstore {
 

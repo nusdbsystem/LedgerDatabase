@@ -9,9 +9,9 @@
 #ifndef _TIMESTAMP_H_
 #define _TIMESTAMP_H_
 
-#include "lib/assert.h"
-#include "lib/message.h"
-#include "proto/common-proto.pb.h"
+#include "distributed/lib/assert.h"
+#include "distributed/lib/message.h"
+#include "distributed/proto/common-proto.pb.h"
 
 class Timestamp
 {

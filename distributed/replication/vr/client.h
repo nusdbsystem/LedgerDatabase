@@ -1,9 +1,9 @@
 #ifndef _VR_CLIENT_H_
 #define _VR_CLIENT_H_
 
-#include "replication/common/client.h"
-#include "lib/configuration.h"
-#include "proto/vr-proto.pb.h"
+#include "distributed/replication/common/client.h"
+#include "distributed/lib/configuration.h"
+#include "distributed/proto/vr-proto.pb.h"
 
 #include <unordered_map>
 

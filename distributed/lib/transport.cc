@@ -1,5 +1,5 @@
-#include "lib/assert.h"
-#include "lib/transport.h"
+#include "distributed/lib/assert.h"
+#include "distributed/lib/transport.h"
 
 TransportReceiver::~TransportReceiver()
 {

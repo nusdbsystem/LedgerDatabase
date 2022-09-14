@@ -1,4 +1,4 @@
-#include "store/strongstore/shardclient.h"
+#include "distributed/store/strongstore/shardclient.h"
 #include <sys/time.h>
 
 namespace strongstore {

@@ -6,7 +6,7 @@
  *
  **********************************************************************/
 
-#include "store/common/truetime.h"
+#include "distributed/store/common/truetime.h"
 
 TrueTime::TrueTime() {
     simError = 0;

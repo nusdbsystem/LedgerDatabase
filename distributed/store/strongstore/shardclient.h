@@ -1,19 +1,19 @@
 #ifndef _STRONG_SHARDCLIENT_H_
 #define _STRONG_SHARDCLIENT_H_
 
-#include "lib/assert.h"
-#include "lib/message.h"
-#include "lib/transport.h"
-#include "replication/vr/client.h"
-#include "store/common/frontend/client.h"
-#include "store/common/frontend/txnclient.h"
-#include "store/common/timestamp.h"
-#include "store/common/transaction.h"
+#include "distributed/lib/assert.h"
+#include "distributed/lib/message.h"
+#include "distributed/lib/transport.h"
+#include "distributed/replication/vr/client.h"
+#include "distributed/store/common/frontend/client.h"
+#include "distributed/store/common/frontend/txnclient.h"
+#include "distributed/store/common/timestamp.h"
+#include "distributed/store/common/transaction.h"
 #include "ledger/common/db.h"
 #include "ledger/ledgerdb/mpt/trie.h"
 #include "ledger/ledgerdb/ledgerdb.h"
 #include "ledger/qldb/qldb.h"
-#include "proto/strong-proto.pb.h"
+#include "distributed/proto/strong-proto.pb.h"
 
 namespace strongstore {
 

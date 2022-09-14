@@ -1,11 +1,11 @@
 #ifndef _BUFFER_CLIENT_H_
 #define _BUFFER_CLIENT_H_
 
-#include "lib/assert.h"
-#include "lib/message.h"
-#include "store/common/promise.h"
-#include "store/common/transaction.h"
-#include "store/common/frontend/txnclient.h"
+#include "distributed/lib/assert.h"
+#include "distributed/lib/message.h"
+#include "distributed/store/common/promise.h"
+#include "distributed/store/common/transaction.h"
+#include "distributed/store/common/frontend/txnclient.h"
 
 class BufferClient
 {

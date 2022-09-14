@@ -9,10 +9,10 @@
 #ifndef _TRANSACTION_H_
 #define _TRANSACTION_H_
 
-#include "lib/assert.h"
-#include "lib/message.h"
-#include "store/common/timestamp.h"
-#include "proto/common-proto.pb.h"
+#include "distributed/lib/assert.h"
+#include "distributed/lib/message.h"
+#include "distributed/store/common/timestamp.h"
+#include "distributed/proto/common-proto.pb.h"
 
 #include <unordered_map>
 

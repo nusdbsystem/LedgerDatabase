@@ -1,10 +1,10 @@
 #ifndef _PROMISE_H_
 #define _PROMISE_H_
 
-#include "lib/assert.h"
-#include "lib/message.h"
-#include "lib/transport.h"
-#include "store/common/transaction.h"
+#include "distributed/lib/assert.h"
+#include "distributed/lib/message.h"
+#include "distributed/lib/transport.h"
+#include "distributed/store/common/transaction.h"
 
 #include <condition_variable>
 #include <mutex>

@@ -1,11 +1,11 @@
 #ifndef _VR_REPLICA_H_
 #define _VR_REPLICA_H_
 
-#include "lib/configuration.h"
-#include "replication/common/log.h"
-#include "replication/common/replica.h"
-#include "replication/common/quorumset.h"
-#include "proto/vr-proto.pb.h"
+#include "distributed/lib/configuration.h"
+#include "distributed/replication/common/log.h"
+#include "distributed/replication/common/replica.h"
+#include "distributed/replication/common/quorumset.h"
+#include "distributed/proto/vr-proto.pb.h"
 
 #include <map>
 #include <memory>

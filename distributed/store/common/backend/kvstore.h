@@ -1,8 +1,8 @@
 #ifndef _KV_STORE_H_
 #define _KV_STORE_H_
 
-#include "lib/assert.h"
-#include "lib/message.h"
+#include "distributed/lib/assert.h"
+#include "distributed/lib/message.h"
 #include <string>
 #include <unordered_map>
 #include <list>

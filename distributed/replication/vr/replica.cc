@@ -1,11 +1,11 @@
-#include "replication/common/replica.h"
-#include "replication/vr/replica.h"
-#include "proto/vr-proto.pb.h"
+#include "distributed/replication/common/replica.h"
+#include "distributed/replication/vr/replica.h"
+#include "distributed/proto/vr-proto.pb.h"
 
-#include "lib/assert.h"
-#include "lib/configuration.h"
-#include "lib/message.h"
-#include "lib/transport.h"
+#include "distributed/lib/assert.h"
+#include "distributed/lib/configuration.h"
+#include "distributed/lib/message.h"
+#include "distributed/lib/transport.h"
 
 #include <algorithm>
 #include <sys/time.h>

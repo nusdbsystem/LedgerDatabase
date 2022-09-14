@@ -1,7 +1,7 @@
 #ifndef _LIB_TRANSPORT_H_
 #define _LIB_TRANSPORT_H_
 
-#include "lib/configuration.h"
+#include "distributed/lib/configuration.h"
 
 #include <google/protobuf/message.h>
 #include <functional>

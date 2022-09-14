@@ -6,7 +6,7 @@
  *
  **********************************************************************/
 
-#include "store/common/timestamp.h"
+#include "distributed/store/common/timestamp.h"
 
 void
 Timestamp::operator=(const Timestamp &t)

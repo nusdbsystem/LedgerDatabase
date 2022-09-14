@@ -6,7 +6,7 @@
  *
  **********************************************************************/
 
-#include "store/common/transaction.h"
+#include "distributed/store/common/transaction.h"
 
 using namespace std;
 

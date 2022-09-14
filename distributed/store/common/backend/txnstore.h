@@ -1,12 +1,12 @@
 #ifndef _TXN_STORE_H_
 #define _TXN_STORE_H_
 
-#include "lib/assert.h"
-#include "lib/message.h"
-#include "store/common/timestamp.h"
-#include "store/common/transaction.h"
-#include "proto/strong-proto.pb.h"
-#include "store/common/backend/type.h"
+#include "distributed/lib/assert.h"
+#include "distributed/lib/message.h"
+#include "distributed/store/common/timestamp.h"
+#include "distributed/store/common/transaction.h"
+#include "distributed/proto/strong-proto.pb.h"
+#include "distributed/store/common/backend/type.h"
 
 class TxnStore
 {

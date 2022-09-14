@@ -1,6 +1,6 @@
-#include "replication/common/log.h"
-#include "proto/request.pb.h"
-#include "lib/assert.h"
+#include "distributed/replication/common/log.h"
+#include "distributed/proto/request.pb.h"
+#include "distributed/lib/assert.h"
 
 #include <openssl/sha.h>
 

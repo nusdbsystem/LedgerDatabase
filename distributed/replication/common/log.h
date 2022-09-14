@@ -1,11 +1,11 @@
 #ifndef _COMMON_LOG_H_
 #define _COMMON_LOG_H_
 
-#include "proto/request.pb.h"
-#include "lib/assert.h"
-#include "lib/message.h"
-#include "lib/transport.h"
-#include "replication/common/viewstamp.h"
+#include "distributed/proto/request.pb.h"
+#include "distributed/lib/assert.h"
+#include "distributed/lib/message.h"
+#include "distributed/lib/transport.h"
+#include "distributed/replication/common/viewstamp.h"
 
 #include <map>
 #include <google/protobuf/message.h>
@@ -82,7 +82,7 @@ private:
     bool useHash;
 };
 
-#include "replication/common/log-impl.h"
+#include "distributed/replication/common/log-impl.h"
 
 }      // namespace replication
 

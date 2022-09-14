@@ -1,9 +1,9 @@
 #ifndef _LIB_TCPTRANSPORT_H_
 #define _LIB_TCPTRANSPORT_H_
 
-#include "lib/configuration.h"
-#include "lib/transport.h"
-#include "lib/transportcommon.h"
+#include "distributed/lib/configuration.h"
+#include "distributed/lib/transport.h"
+#include "distributed/lib/transportcommon.h"
 
 #include <event2/event.h>
 #include <event2/buffer.h>

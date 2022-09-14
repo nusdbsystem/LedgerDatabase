@@ -1,4 +1,4 @@
-#include "store/strongstore/client.h"
+#include "distributed/store/strongstore/client.h"
 
 using namespace std;
 
@@ -72,7 +72,7 @@ Client::run_client()
 void
 Client::Begin()
 {
-        t_id++;
+    t_id++;
     participants.clear();
     commit_sleep = -1;
     for (int i = 0; i < nshards; i++) {
@@ -122,7 +122,7 @@ int Client::BatchGet(std::map<std::string, std::string>& values, std::map<int,
     bclient[p]->BatchGet(promises[p]);
   }
 
-  for (auto entry : promises) {
+  for (auto& entry : promises) {
     Promise *p = entry.second;
     if (p->GetReply() == REPLY_OK) {
       values.insert(p->getValues().begin(), p->getValues().end());
@@ -153,14 +153,15 @@ int Client::BatchGet(std::map<std::string, std::string>& values, std::map<int,
 int Client::BatchGet(std::map<std::string, std::string>& values) {
   int status = REPLY_OK;
 
-  vector<Promise *> promises;
+  map<int, Promise *> promises;
 
   for (auto p : participants) {
-    promises.push_back(new Promise(GET_TIMEOUT));
-    bclient[p]->BatchGet(promises.back());
+    promises.emplace(p, new Promise(PREPARE_TIMEOUT));
+    bclient[p]->BatchGet(promises[p]);
   }
 
-  for (auto p : promises) {
+  for (auto& entry : promises) {
+    auto p = entry.second;
     if (p->GetReply() == REPLY_OK) {
       values.insert(p->getValues().begin(), p->getValues().end());
     } else {

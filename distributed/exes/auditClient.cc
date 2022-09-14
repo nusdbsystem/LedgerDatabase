@@ -4,8 +4,8 @@
 #include "tbb/concurrent_hash_map.h"
 #include "boost/thread.hpp"
 
-#include "store/common/truetime.h"
-#include "store/strongstore/client.h"
+#include "distributed/store/common/truetime.h"
+#include "distributed/store/strongstore/client.h"
 
 using namespace std;
 

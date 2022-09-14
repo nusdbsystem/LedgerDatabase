@@ -1,7 +1,7 @@
-#include "replication/common/log.h"
-#include "replication/common/replica.h"
+#include "distributed/replication/common/log.h"
+#include "distributed/replication/common/replica.h"
 
-#include "lib/message.h"
+#include "distributed/lib/message.h"
 
 #include <stdlib.h>
 

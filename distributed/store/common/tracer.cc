@@ -6,7 +6,7 @@
  *
  **********************************************************************/
 
-#include "store/common/tracer.h"
+#include "distributed/store/common/tracer.h"
 
 using namespace std;
 

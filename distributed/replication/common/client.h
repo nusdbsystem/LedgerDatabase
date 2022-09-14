@@ -1,9 +1,9 @@
 #ifndef _COMMON_CLIENT_H_
 #define _COMMON_CLIENT_H_
 
-#include "lib/configuration.h"
-#include "proto/request.pb.h"
-#include "lib/transport.h"
+#include "distributed/lib/configuration.h"
+#include "distributed/proto/request.pb.h"
+#include "distributed/lib/transport.h"
 
 
 #include <functional>
