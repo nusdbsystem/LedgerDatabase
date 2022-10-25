@@ -6,6 +6,7 @@ LIST(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake/Modules)
 
 OPTION(LEDGERDB "Use LedgerDB" ON)
 OPTION(AMZQLDB "Use QLDB" OFF)
+OPTION(SQLLEDGER "Use SQL Ledger" OFF)
 
 if(LEDGERDB)
   message(STATUS "Use LedgerDB")
@@ -15,6 +16,11 @@ endif()
 if(AMZQLDB)
   message(STATUS "Use QLDB")
   add_definitions(-DAMZQLDB)
+endif()
+
+if(SQLLEDGER)
+  message(STATUS "Use SQL Ledger")
+  add_definitions(-DSQLLEDGER)
 endif()
 
 SET(BOOST_COMPONENT "filesystem")

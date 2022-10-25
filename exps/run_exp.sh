@@ -7,7 +7,7 @@ wperc=(50)
 nshards=(16)
 
 # Number of client processes per client node
-nclients=(20)
+nclients=(1)
 
 # Zipf factor
 theta=(0)
@@ -19,7 +19,7 @@ rtime=120
 delay=100
 
 # Transaction size
-tlen=1
+tlen=10
 
 # ycsb or tpcc
 driver=ycsb

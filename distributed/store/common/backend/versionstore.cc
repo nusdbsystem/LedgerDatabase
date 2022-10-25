@@ -15,6 +15,10 @@ VersionedKVStore::VersionedKVStore(const string& db_path, int timeout) {
   ledgebase::qldb::BPlusConfig::Init(45, 15);
   qldb_.reset(new ledgebase::qldb::QLDB());
 #endif
+#ifdef SQLLEDGER
+  ledgebase::qldb::BPlusConfig::Init(45, 15);
+  sqlledger_.reset(new ledgebase::sqlledger::SQLLedger(timeout, db_path));
+#endif
 }
     
 VersionedKVStore::~VersionedKVStore() { }
@@ -25,6 +29,9 @@ bool VersionedKVStore::GetDigest(strongstore::proto::Reply* reply) {
 
 #ifdef LEDGERDB
   ldb->GetRootDigest(&tip, &hash);
+#endif
+#ifdef SQLLEDGER
+  sqlledger_->GetDigest(&tip, &hash);
 #endif
 
   auto digest = reply->mutable_digest();
@@ -80,6 +87,19 @@ bool VersionedKVStore::GetNVersions(
     }
   }
 #endif
+#ifdef SQLLEDGER
+  for (auto& key : ver_keys) {
+    auto result = sqlledger_->GetHistory(key.first, key.second);
+    for (auto& res : result) {
+      auto docs = ledgebase::Utils::splitBy(res, '|');
+      auto kv = reply->add_values();
+      kv->set_key(docs[3]);
+      kv->set_val(docs[4]);
+      kv->set_estimate_block(std::stoul(docs[0]));
+      reply->add_timestamps(std::stoul(docs[5]));
+    }
+  }
+#endif
 
   return true;
 }
@@ -128,6 +148,21 @@ bool VersionedKVStore::BatchGet(const std::vector<std::string>& keys,
     }
   }
 #endif
+#ifdef SQLLEDGER
+  for (auto& key : keys) {
+    auto result = sqlledger_->GetCommitted(key);
+    if (result.size() == 0) {
+      continue;
+    }
+    auto docs = ledgebase::Utils::splitBy(result, '|');
+    
+    auto kv = reply->add_values();
+    kv->set_key(docs[3]);
+    kv->set_val(docs[4]);
+    kv->set_estimate_block(std::stoul(docs[0]));
+    reply->add_timestamps(std::stoul(docs[5]));
+  }
+#endif
 
   return true;
 }
@@ -171,6 +206,17 @@ bool VersionedKVStore::GetRange(const std::string &start,
     for (auto& pos : proofres.pos) {
       p->add_pos(pos);
     }
+  }
+#endif
+#ifdef SQLLEDGER
+  auto results = sqlledger_->Range(start, end);
+  for (auto& r : results) {
+    auto docs = ledgebase::Utils::splitBy(r.second, '|');
+    auto kv = reply->add_values();
+    kv->set_key(docs[3]);
+    kv->set_val(docs[4]);
+    kv->set_estimate_block(std::stoul(docs[0]));
+    reply->add_timestamps(std::stoul(docs[5]));
   }
 #endif
   return true;
@@ -219,8 +265,35 @@ bool VersionedKVStore::GetProof(
       p->add_mpt_pos(mptproof[i].GetMapPos(j));
     }
   }
-
 #endif
+#ifdef SQLLEDGER
+  GetDigest(reply);
+  for (auto& entry : keys) {
+    for (auto& key : entry.second) {
+      auto res = sqlledger_->getProof(key, entry.first);
+      auto p = reply->add_sproof();
+      auto blk_proof = p->mutable_blk_proof();
+      auto txn_proof = p->mutable_txn_proof();
+      p->set_digest(res.digest);
+      for (size_t i = 0; i < res.blks.size(); ++i) {
+        p->add_blocks(res.blks[i]);
+      }
+      blk_proof->set_digest(res.blk_proof.digest);
+      blk_proof->set_value(res.blk_proof.value);
+      for (size_t i = 0; i < res.blk_proof.proof.size(); ++i) {
+        blk_proof->add_proof(res.blk_proof.proof[i]);
+        blk_proof->add_pos(res.blk_proof.pos[i]);
+      }
+      txn_proof->set_digest(res.txn_proof.digest);
+      txn_proof->set_value(res.txn_proof.value);
+      for (size_t i = 0; i < res.txn_proof.proof.size(); ++i) {
+        txn_proof->add_proof(res.txn_proof.proof[i]);
+        txn_proof->add_pos(res.txn_proof.pos[i]);
+      }
+    }
+  }
+#endif
+
   gettimeofday(&t1, NULL);
   auto lat = (t1.tv_sec - t0.tv_sec)*1000000 + t1.tv_usec - t0.tv_usec;
   //std::cout << "getproof " << lat << " " << ks.size() << std::endl;
@@ -250,6 +323,16 @@ bool VersionedKVStore::GetProof(const uint64_t& seq,
     }
   }
 #endif
+#ifdef SQLLEDGER
+  auto auditor = sqlledger_->getAudit(seq);
+  auto a = reply->mutable_saudit();
+  a->set_block_no(auditor.block_seq);
+  a->set_digest(auditor.digest);
+  a->set_txns(auditor.txns);
+  for (auto& b : auditor.blks) {
+    a->add_blocks(b);
+  }
+#endif
   return true;
 }
 
@@ -273,6 +356,17 @@ void VersionedKVStore::put(const vector<string> &keys,
   qldb_->Set("test", keys, values);
   if (reply != nullptr) {
     BatchGet(keys, reply);
+  }
+#endif
+#ifdef SQLLEDGER
+  auto estimate_blocks = sqlledger_->Set(keys, values);
+  if (reply != nullptr) {
+    for (size_t i = 0; i < keys.size(); ++i) {
+      auto kv = reply->add_values();
+      kv->set_key(keys[i]);
+      kv->set_val(values[i]);
+      kv->set_estimate_block(estimate_blocks);
+    }
   }
 #endif
 }

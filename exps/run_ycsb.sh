@@ -2,11 +2,11 @@
 
 #============= Parameters to fill ============
 nshard=16           # number of shards
-nclient=20         # number of clients / machine
+nclient=1         # number of clients / machine
 rtime=120          # duration to run
 delay=100          # verification delay
 
-tlen=1            # transaction length
+tlen=10            # transaction length
 wper=50            # writes percentage
 rper=50            # reads percentage
 zalpha=0           # zipf alpha
@@ -19,7 +19,7 @@ clients=`cat clients`
 client="verifyClient"
 store="strongstore"
 mode="occ"
-txnrate=120
+txnrate=1000
 
 # Print out configuration being used.
 echo "Configuration:"

@@ -13,6 +13,7 @@
 #include "ledger/ledgerdb/mpt/trie.h"
 #include "ledger/ledgerdb/ledgerdb.h"
 #include "ledger/qldb/qldb.h"
+#include "ledger/sqlledger/sqlledger.h"
 #include "distributed/proto/strong-proto.pb.h"
 
 namespace strongstore {

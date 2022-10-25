@@ -386,6 +386,38 @@ ShardClient::GetProofCallback(size_t uid,
       }
     }
 #endif
+#ifdef SQLLEDGER
+    res = VerifyStatus::PASS;
+    std::string ledger = "test";
+    auto digest = ledgebase::Hash::FromBase32(reply.digest().hash());
+    for (int i = 0; i < reply.sproof_size(); ++i) {
+      ledgebase::sqlledger::SQLLedgerProof prover;
+      auto curr_proof = reply.sproof(i);
+      prover.digest = curr_proof.digest();
+      for (int j = 0; j < curr_proof.blocks_size(); ++j) {
+        prover.blks.emplace_back(curr_proof.blocks(j));
+      }
+      auto blk_proof = curr_proof.blk_proof();
+      prover.blk_proof.digest = blk_proof.digest();
+      prover.blk_proof.value  = blk_proof.value();
+      for (int j = 0; j < blk_proof.proof_size(); ++j) {
+        prover.blk_proof.proof.emplace_back(blk_proof.proof(j));
+        prover.blk_proof.pos.emplace_back(blk_proof.pos(j));
+      }
+
+      auto txn_proof = curr_proof.txn_proof();
+      prover.txn_proof.digest = txn_proof.digest();
+      prover.txn_proof.value  = txn_proof.value();
+      for (int j = 0; j < txn_proof.proof_size(); ++j) {
+        prover.txn_proof.proof.emplace_back(txn_proof.proof(j));
+        prover.txn_proof.pos.emplace_back(txn_proof.pos(j));
+      }
+      
+      if (!prover.Verify()) {
+        res = VerifyStatus::FAILED;
+      }
+    }
+#endif
 
     gettimeofday(&t1, NULL);
     auto elapsed = ((t1.tv_sec - t0.tv_sec)*1000000 +
@@ -409,7 +441,7 @@ ShardClient::GetRangeCallback(const string &request_str, const string &reply_str
     std::vector<std::string> unverified_keys;
     std::vector<uint64_t> estimate_blocks;
 
-#if defined(LEDGERDB)
+#if defined(LEDGERDB) || defined(SQLLEDGER)
     tip_block = reply.digest().block();
     for (size_t i = 0; i < reply.values_size(); ++i) {
       auto v = reply.values(i);
@@ -469,7 +501,7 @@ ShardClient::BatchGetCallback(const string &request_str, const string &reply_str
     std::vector<uint64_t> estimate_blocks;
     std::vector<std::string> unverified_keys;
 
-#if defined(LEDGERDB)
+#if defined(LEDGERDB) || defined(SQLLEDGER)
     tip_block = reply.digest().block();
     for (size_t i = 0; i < reply.values_size(); ++i) {
       auto v = reply.values(i);
@@ -532,7 +564,7 @@ ShardClient::CommitCallback(const string &request_str, const string &reply_str)
     std::vector<uint64_t> estimate_blocks;
     std::vector<std::string> unverified_keys;
     VerifyStatus vs;
-#if defined(LEDGERDB)
+#if defined(LEDGERDB) || defined(SQLLEDGER)
     vs = VerifyStatus::UNVERIFIED;
     tip_block = reply.digest().block();
     for (size_t i = 0; i < reply.values_size(); ++i) {
