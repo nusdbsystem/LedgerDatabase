@@ -422,7 +422,7 @@ ShardClient::GetProofCallback(size_t uid,
     gettimeofday(&t1, NULL);
     auto elapsed = ((t1.tv_sec - t0.tv_sec)*1000000 +
                     (t1.tv_usec - t0.tv_usec));
-    // std::cout << "verify " << elapsed << " " << reply.ByteSizeLong() << " " << keys.size() << " " << res << std::endl;
+    //std::cout << "verify " << elapsed << " " << reply.ByteSizeLong() << " " << keys.size() << " " << res << std::endl;
 
     Promise *w = verifyPromise[uid];
     verifyPromise.erase(uid);
@@ -514,6 +514,8 @@ ShardClient::BatchGetCallback(const string &request_str, const string &reply_str
     }
 #endif
 #ifdef AMZQLDB
+    struct timeval t0, t1;
+    gettimeofday(&t0, NULL);
     VerifyStatus vs = VerifyStatus::PASS;
     ledgebase::Hash digest;
     std::string ledger = "test";
@@ -542,6 +544,10 @@ ShardClient::BatchGetCallback(const string &request_str, const string &reply_str
         vs = VerifyStatus::FAILED;
       }
     }
+    gettimeofday(&t1, NULL);
+    auto elapsed = ((t1.tv_sec - t0.tv_sec)*1000000 +
+                    (t1.tv_usec - t0.tv_usec));
+    // std::cout << "verify " << elapsed << " " << reply.ByteSizeLong() << " " << reply.qproof_size() << " " << vs << std::endl;
 #endif
 
     Promise *w = waiting;
@@ -574,6 +580,8 @@ ShardClient::CommitCallback(const string &request_str, const string &reply_str)
     }
 #endif
 #ifdef AMZQLDB
+    struct timeval t0, t1;
+    gettimeofday(&t0, NULL);
     vs = VerifyStatus::PASS;
     std::string ledger = "test";
     auto digest = ledgebase::Hash::FromBase32(reply.digest().hash());
@@ -597,6 +605,10 @@ ShardClient::CommitCallback(const string &request_str, const string &reply_str)
         vs = VerifyStatus::FAILED;
       }
     }
+    gettimeofday(&t1, NULL);
+    auto elapsed = ((t1.tv_sec - t0.tv_sec)*1000000 +
+                    (t1.tv_usec - t0.tv_usec));
+    std::cout << "verify " << elapsed << " " << reply.ByteSizeLong() << " " << reply.qproof_size() << " " << vs << std::endl;
 #endif
 
     Promise *w = waiting;

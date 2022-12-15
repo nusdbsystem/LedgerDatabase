@@ -17,7 +17,7 @@ for ((i=0; i<$n; i++))
 do
   let line=$i+2 
   server=$(cat $config | sed -n ${line}p | awk -F'[ :]' '{print $2}')
-  command="ssh $server \"source ~/.profile; source ~/.bashrc; mkdir -p $logdir; $cmd -c $config -i $i > $logdir/$shard.replica$i.log 2>&1 &\""
+  command="ssh $server \"source ~/.profile; source ~/.bashrc; mkdir -p $logdir; $cmd -c $config -i $i > $logdir/$shard.replica$i.log 2>$logdir/$shard.replica$i.err &\""
   echo $command
   eval $command
 done

@@ -8,7 +8,7 @@
 #include "ledger/ledgerdb/merkletree.h"
 
 TEST(MERKLETREE, TPS) {
-  std::vector<ledgebase::Hash> hashes;
+  std::vector<std::string> hashes;
 
   ledgebase::DB db;
   db.Open("testdb");
@@ -19,7 +19,7 @@ TEST(MERKLETREE, TPS) {
   timeval t0, t1;
   gettimeofday(&t0, NULL);
   for (size_t i = 0; i < 100000; ++i) {
-    hashes.emplace_back(ledgebase::Hash::ComputeFrom(std::to_string(i)));
+    hashes.emplace_back(ledgebase::Hash::ComputeFrom(std::to_string(i)).ToBase32());
 
     if (hashes.size() == 100) {
       std::string root_key, root_hash;

@@ -2,11 +2,11 @@
 
 #============= Parameters to fill ============
 nshard=16          # number of shards
-nclient=20         # number of clients / machine
+nclient=10         # number of clients / machine
 rtime=120          # duration to run
-delay=100          # verification delay
+delay=1000          # verification delay
 
-wper=50             # writes percentage
+wper=0             # writes percentage
 zalpha=0           # zipf alpha
 #============= Start Experiment =============
 . env.sh
@@ -34,12 +34,12 @@ for ((i=0; i<$nshard; i++))
 do
   echo "Starting shard$i replicas.."
   $expdir/start_replica.sh shard$i $expdir/shard$i.config \
-    "$bindir/$store -m $mode -e 0 -s 0 -w tpcc -f $initfile -N $nshard -n $i" $logdir
+    "$bindir/$store -m $mode -e 0 -s 0 -w tpcc -f $initfile -N $nshard -n $i -t 100" $logdir
 done
 
 
 # Wait a bit for all replicas to start up
-sleep 10
+sleep 50
 
 # Run the clients
 echo "Running the client(s)"

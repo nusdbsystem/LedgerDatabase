@@ -7,7 +7,7 @@ wperc=(50)
 nshards=(16)
 
 # Number of client processes per client node
-nclients=(1)
+nclients=(10)
 
 # Zipf factor
 theta=(0)
@@ -33,6 +33,7 @@ thetas=$( IFS=$','; echo "${theta[*]}" )
 
 for i in ${wperc[@]}
 do
+  let rper=100-$i
   for j in ${nshards[@]}
   do
     ./load.sh $j
@@ -47,6 +48,7 @@ do
         sed -i -e "s/tlen=[0-9]*/tlen=${tlen}/g" run_$driver.sh
         sed -i -e "s/rtime=[0-9]*/rtime=${rtime}/g" run_$driver.sh
         sed -i -e "s/wper=[0-9]*/wper=$i/g" run_$driver.sh
+        sed -i -e "s/rper=[0-9]*/rper=$rper/g" run_$driver.sh
         sed -i -e "s/nshard=[0-9]*/nshard=$j/g" run_$driver.sh
         sed -i -e "s/nclient=[0-9]*/nclient=$c/g" run_$driver.sh
         sed -i -e "s/zalpha=[0-9\.]*/zalpha=$k/g" run_$driver.sh

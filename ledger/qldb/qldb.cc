@@ -11,6 +11,7 @@ namespace qldb {
 bool QLProofResult::Verify(const Hash digest) {
   auto doc = Document::Encode(data.key, data.val, addr, meta);
   auto doc_hash = doc.hash();
+  //std::cout << "verify height " << proof.size() << std::endl;
   for (size_t i = 0; i < proof.size(); ++i) {
     if (proof[i].empty()) {
       std::unique_ptr<byte_t[]> node(
@@ -327,6 +328,7 @@ QLProofResult QLDB::getProof(const std::string& name, const uint64_t tip,
     curr_seq = pr_seq;
     doc_size /= 2;
   }
+  //std::cout << "block " << level << std::endl;
 
   level = 0;
   curr_seq = block_addr;
@@ -350,6 +352,7 @@ QLProofResult QLDB::getProof(const std::string& name, const uint64_t tip,
     curr_seq = pr_seq;
     latest /= 2;
   }
+  //std::cout << "height " << level << std::endl;
   return result;
 }
 

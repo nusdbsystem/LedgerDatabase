@@ -1,2 +1,4 @@
 build/
+exps/result/
+exps/shard*
 .vscode

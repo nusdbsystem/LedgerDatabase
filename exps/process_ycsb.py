@@ -13,6 +13,8 @@ rLatency = []
 wLatency = []
 hLatency = []
 vLatency = []
+nkey = 0
+nkeys = []
 
 tExtra = 0.0
 sExtra = 0.0
@@ -22,6 +24,9 @@ xLatency = []
 
 for line in open(sys.argv[1]):
   if line.startswith('#') or line.strip() == "":
+    continue
+  if line.startswith("verifynkeys"):
+    nkey = float(line[12:-1])
     continue
 
   line = line.strip().split()
@@ -56,6 +61,7 @@ for line in open(sys.argv[1]):
   elif op == 2:
     hLatency.append(latency)
   elif int(line[0]) > 0:
+    nkeys.append(nkey)
     vLatency.append(latency)
 
   tLatency.append(latency) 
@@ -90,6 +96,7 @@ outfile.write(str(len(hLatency)) + "\n")
 outfile.write(str(sum(hLatency)) + "\n")
 outfile.write(str(len(vLatency)) + "\n")
 outfile.write(str(sum(vLatency)) + "\n")
+outfile.write(str(sum(nkeys)) + "\n")
 # print "Transactions(All/Success): ", len(tLatency), len(sLatency)
 # print "Abort Rate: ", (float)(len(tLatency)-len(sLatency))/len(tLatency)
 # print "Throughput (All/Success): ", len(tLatency)/(end-start), len(sLatency)/(end-start)

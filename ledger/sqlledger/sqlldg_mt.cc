@@ -8,6 +8,7 @@ namespace sqlledger {
 void MerkleTree::Build(const std::string& mtid,
     const std::vector<std::string> &leaves, std::string* toplevel,
     std::string* root_hash) {
+  if (leaves.size() == 0) return;
   // commit leaf hashes
   int level = 0;
   std::vector<Hash> level_hashes;
@@ -92,6 +93,7 @@ bool Proof::Verify() const {
       calc_hash = Hash::ComputeFrom(calc_hash.value(), Hash::kByteLength);
     }
   }
+  //std::cout << "tree height " << proof.size() << std::endl;
   if (calc_hash == Hash::FromBase32(digest)) return true;
   return false;
 }

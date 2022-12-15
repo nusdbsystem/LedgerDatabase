@@ -380,6 +380,7 @@ MPTProof Trie::GetProof(const std::string& key) const {
   MPTProof proof;
   std::string encoded_key = MPTConfig::KeybytesToHex(key);
   TryGetProof(root_node_->chunk(), encoded_key, 0, &proof);
+  //std::cout << "blocks " << proof.MapSize() << std::endl;
   return proof;
 }
 

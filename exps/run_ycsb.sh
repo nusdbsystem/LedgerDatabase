@@ -1,12 +1,12 @@
 #!/bin/bash
 
 #============= Parameters to fill ============
-nshard=16           # number of shards
-nclient=1         # number of clients / machine
+nshard=1           # number of shards
+nclient=20         # number of clients / machine
 rtime=120          # duration to run
 delay=100          # verification delay
 
-tlen=10            # transaction length
+tlen=1            # transaction length
 wper=50            # writes percentage
 rper=50            # reads percentage
 zalpha=0           # zipf alpha
@@ -19,7 +19,7 @@ clients=`cat clients`
 client="verifyClient"
 store="strongstore"
 mode="occ"
-txnrate=1000
+txnrate=120
 
 # Print out configuration being used.
 echo "Configuration:"
@@ -40,7 +40,7 @@ for ((i=0; i<$nshard; i++))
 do
   echo "Starting shard$i replicas.."
   $expdir/start_replica.sh shard$i $expdir/shard$i.config \
-    "$bindir/$store -m $mode -e 0 -s 0 -N $nshard -n $i -w ycsb -k 100000" $logdir
+    "$bindir/$store -m $mode -e 0 -s 0 -N $nshard -n $i -t 100 -w ycsb -k 100000" $logdir
 done
 
 # Wait a bit for all replicas to start up

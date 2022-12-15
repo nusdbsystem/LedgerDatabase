@@ -45,7 +45,7 @@ void LedgerDB::buildTree(int timeout) {
     uint64_t first_block;
     uint64_t last_block;
     Tree_Block blk;
-    std::vector<Hash> mt_new_hashes;
+    std::vector<std::string> mt_new_hashes;
     std::map<std::string, std::string> mpt_blks;
 
     while (tree_queue_.try_pop(blk)) {
@@ -56,7 +56,8 @@ void LedgerDB::buildTree(int timeout) {
       added = true;
       std::string mt_blk_val;
       ledger_.Get("ledger-"+std::to_string(blk.blk_seq), &mt_blk_val);
-      mt_new_hashes.push_back(Hash::ComputeFrom(mt_blk_val));
+      auto hash = Hash::ComputeFrom(mt_blk_val);
+      mt_new_hashes.push_back(hash.ToBase32());
       for (size_t i = 0; i < blk.mpt_ks.size(); i++) {
         mpt_blks[blk.mpt_ks[i]] = blk.mpt_ts;
       }
@@ -102,7 +103,7 @@ void LedgerDB::buildTree(int timeout) {
       ++commit_seq_;
       gettimeofday(&t1, NULL);
       auto latency = (t1.tv_sec - t0.tv_sec)*1000000 + t1.tv_usec - t0.tv_usec;
-      //std::cerr << "persist " << latency << " " << mpt_ks.size() << std::endl;
+      //std::cerr << "persist " << latency << " " << mpt_ks.size() << " " << mt_new_hashes.size() << std::endl;
     }
     std::this_thread::sleep_for(std::chrono::milliseconds(timeout));
   }
@@ -359,9 +360,9 @@ bool Auditor::Audit(DB* db) {
         std::to_string(cinfo.commit_seq - 1) : "";
   }
 
-  std::vector<Hash> mt_new_hashes;
+  std::vector<std::string> mt_new_hashes;
   for (size_t i = 0; i < blocks.size(); ++i) {
-    mt_new_hashes.emplace_back(Hash::ComputeFrom(blocks[i]));
+    mt_new_hashes.emplace_back(Hash::ComputeFrom(blocks[i]).ToBase32());
   }
 
   std::string root_key, root_hash;

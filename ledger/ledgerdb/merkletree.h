@@ -38,7 +38,7 @@ class MerkleTree {
   MerkleTree(DB *db) : ledger_(db) { }
   ~MerkleTree() = default;
 
-  void update(const uint64_t blk_seq, const std::vector<Hash> &blk_hashes,
+  void update(const uint64_t blk_seq, const std::vector<std::string> &blk_hashes,
       const std::string& prev_commit_seq, std::string* root_key,
       std::string* root_hash);
   Proof getProof(const std::string& commit_seq, const std::string& root_key,

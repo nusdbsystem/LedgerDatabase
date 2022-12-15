@@ -227,6 +227,7 @@ bool VersionedKVStore::GetProof(
     strongstore::proto::Reply* reply) {
   timeval t0, t1;
   gettimeofday(&t0, NULL);
+  int nkey = 0;
 #ifdef LEDGERDB
   std::vector<ledgebase::ledgerdb::Proof> mtproof;
   std::vector<ledgebase::ledgerdb::MPTProof> mptproof;
@@ -243,6 +244,7 @@ bool VersionedKVStore::GetProof(
       blks.push_back(vkey.first);
     }
   }
+  nkey = ks.size();
   
   ldb->GetProofs(ks, blks, mtproof, mptproof, &mtdigest,
       &block, &mptdigest);
@@ -270,6 +272,7 @@ bool VersionedKVStore::GetProof(
   GetDigest(reply);
   for (auto& entry : keys) {
     for (auto& key : entry.second) {
+      nkey++;
       auto res = sqlledger_->getProof(key, entry.first);
       auto p = reply->add_sproof();
       auto blk_proof = p->mutable_blk_proof();
@@ -296,7 +299,7 @@ bool VersionedKVStore::GetProof(
 
   gettimeofday(&t1, NULL);
   auto lat = (t1.tv_sec - t0.tv_sec)*1000000 + t1.tv_usec - t0.tv_usec;
-  //std::cout << "getproof " << lat << " " << ks.size() << std::endl;
+  //std::cout << "getproof " << lat << " " << nkey << std::endl;
   return true;
 }
 

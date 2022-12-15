@@ -26,7 +26,9 @@ void SQLLedger::updateLedger(int timeout) {
       continue;
     }
 
-    std::unique_ptr<std::map<uint64_t, std::vector<std::string>>>   new_txns;
+    timeval t0, t1;
+    gettimeofday(&t0, NULL);
+    std::unique_ptr<std::map<uint64_t, std::vector<std::string>>> new_txns;
     uint64_t new_blk_seq;
     {
       boost::unique_lock<boost::shared_mutex> blockseqlock(lock_);
@@ -37,9 +39,11 @@ void SQLLedger::updateLedger(int timeout) {
     }
 
     int txn_seq = 0;
+    long nkey = 0;
     std::vector<std::string> leaves;
     for (auto& entry : *(new_txns.get())) {
       std::string txnid = "txn" + std::to_string(entry.first);
+      nkey += entry.second.size();
 
       // build merkle txn merkle tree
       std::string level, txnroot;
@@ -69,6 +73,10 @@ void SQLLedger::updateLedger(int timeout) {
     std::string newhash = Hash::ComputeFrom(newblock).ToBase32();
     db_.Put(block_key, newblock);
     db_.Put("digest", newhash + "|" + std::to_string(new_blk_seq));
+
+    gettimeofday(&t1, NULL);
+    auto lat = (t1.tv_sec - t0.tv_sec)*1000000 + t1.tv_usec - t0.tv_usec;
+    //std::cerr << "persist " << lat << " " << nkey << " " << new_txns->size() << std::endl;
   }
 }
 
@@ -186,6 +194,7 @@ SQLLedgerProof SQLLedger::getProof(const std::string& key,
   // get block
   int level;
   std::string blkroot;
+  //std::cout << "blocks " << (tip - block_addr) << std::endl;
   for (size_t i = block_addr; i <= tip; ++i) {
     std::string block;
     db_.Get("blk" + std::to_string(i), &block);
@@ -214,25 +223,39 @@ SQLLedgerProof SQLLedger::getProof(const std::string& key,
   proof.blk_proof.value = txn;
   proof.txn_proof = mt_->GetProof("txn" + txnid, txnrootlevel, docseq);
   proof.txn_proof.value = doc;
+  //std::cout << "height " << level + txnrootlevel << std::endl;
   return proof;
 }
 
 bool SQLLedgerProof::Verify() {
   std::string target = digest;
   std::string blk_mt_root;
+  int blocks = 0;
   for (auto it = blks.rbegin(); it != blks.rend(); ++it) {
-    if (Hash::ComputeFrom(*it).ToBase32().compare(target) != 0) return false;
+    if (Hash::ComputeFrom(*it).ToBase32().compare(target) != 0) {
+      //std::cout << "verification failed at block" << std::endl;
+    }
     auto block_info = Utils::splitBy(*it, '|');
     target = block_info[0];
     blk_mt_root = block_info[1];
+    blocks++;
   }
+  //std::cout << "block " << blks.size() << " " << blocks << std::endl;
 
-  if (blk_mt_root.compare(blk_proof.digest) != 0) return false;
-  if (!blk_proof.Verify()) return false;
+  if (blk_mt_root.compare(blk_proof.digest) != 0) {
+    //std::cout << "verification failed at txn mt root" << std::endl;
+  }
+  std::cout << "txn ";
+  if (!blk_proof.Verify()) {
+    //std::cout << "verification failed at txn tree" << std::endl;
+  }
 
   auto txn_info = Utils::splitBy(blk_proof.value, '|');
   std::string txn_mt_root = txn_info[3];
-  if (txn_mt_root != txn_proof.digest) return false;
+  if (txn_mt_root != txn_proof.digest) {
+    //std::cout << "verification failed at row mt root" << std::endl;
+  }
+  //std::cout << "row ";
   return txn_proof.Verify();
 }
 
