@@ -1,5 +1,5 @@
 # Ledger Database
-This repository includes the implementations of QLDB and LedgerDB, which are used in the paper "[GlassDB: Practical Verifiable Ledger Database Through Transparency](http://arxiv.org/abs/2207.00944)". Extended version of paper can be found [Here](doc/)
+This repository includes the implementations of QLDB and LedgerDB, which are used in the paper "[GlassDB: Practical Verifiable Ledger Database Through Transparency](doc/)".
 
 ## Code Structure
 - `/distributed` - A common distributed layer using two-PC for distribute transaction
