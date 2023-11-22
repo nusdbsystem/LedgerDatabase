@@ -146,7 +146,7 @@ int verifyThread(strongstore::Client* client, int idx, int tLen, int wPer, int d
                    (t1.tv_usec - t0.tv_usec);
 
     fprintf(stderr, "%ld %ld.%06ld %ld.%06ld %ld %d %d\n", unverified_keys.size(),
-        t0.tv_sec, t0.tv_usec, t1.tv_sec, t1.tv_usec, latency, vs?1:0, 3);
+        t0.tv_sec, t0.tv_usec, t1.tv_sec, t1.tv_usec, latency, vs?0:1, 3);
     
     {
       boost::unique_lock<boost::shared_mutex> write(lck);
