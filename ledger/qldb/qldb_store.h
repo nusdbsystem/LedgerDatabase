@@ -13,9 +13,15 @@ namespace qldb {
 class QLDBStore {
 
  public:
-  QLDBStore();
-  QLDBStore(const std::string& db_path, const bool persist = true);
+  QLDBStore() { total_ = 0; }
   ~QLDBStore() = default;
+
+  inline bool Open(const std::string& db_path) {
+    db_opts_.error_if_exists = false;
+    db_opts_.create_if_missing = true;
+
+    rocksdb::DB::Open(db_opts_, db_path, &db_).ok();
+  }
 
   std::string GetString(const std::string& key);
   const Chunk* Get(const std::string& key);
@@ -27,6 +33,8 @@ class QLDBStore {
     cache_.emplace(id, std::move(chunk));
   }
 
+  size_t size() { return total_; }
+
  private:
   inline Chunk ToChunk(const rocksdb::Slice& x) const {
     const auto data_size = x.size();
@@ -35,14 +43,10 @@ class QLDBStore {
     return Chunk(std::move(buf));
   }
 
-  bool persist_;
   std::unordered_map<std::string, Chunk> cache_;
-  std::string db_path_;
   rocksdb::DB* db_;
   rocksdb::Options db_opts_;
-  rocksdb::ReadOptions db_read_opts_;
-  rocksdb::WriteOptions db_write_opts_;
-  rocksdb::FlushOptions db_flush_opts_;
+  size_t total_;
 };
 
 }  // namespace qldb

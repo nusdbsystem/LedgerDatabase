@@ -2,9 +2,9 @@
 #define QLDB_H_
 
 #include "ledger/common/chunk.h"
+#include "ledger/common/db.h"
 #include "ledger/common/hash.h"
 #include "ledger/common/slice.h"
-#include "ledger/qldb/qldb_store.h"
 #include "ledger/qldb/qlnode.h"
 #include "ledger/qldb/ql_btree.h"
 
@@ -30,7 +30,7 @@ struct DigestInfo {
 
 class QLDB {
  public:
-  QLDB();
+  QLDB(std::string dbpath);
   ~QLDB() = default;
 
   void CreateLedger(const std::string& name);
@@ -59,6 +59,8 @@ class QLDB {
   QLProofResult getProof(const std::string& name, const uint64_t tip,
       const uint64_t block_addr, const uint32_t seq);
 
+  size_t size() { return db_.size(); }
+
  protected:
   Chunk GetVersion(const std::string& name, const std::string& key,
       const size_t version) const;
@@ -69,7 +71,7 @@ class QLDB {
   void calculateDigest(const Hash& block_hash, const Hash& prev_hash,
       const std::string& name, const uint64_t seqno);
 
-  std::unique_ptr<QLDBStore> db_;
+  DB db_;
   std::unique_ptr<QLBTree> indexed_;
   std::unique_ptr<QLBTree> history_;
 };

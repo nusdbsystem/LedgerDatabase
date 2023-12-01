@@ -4,6 +4,7 @@
 #include <vector>
 
 #include "ledger/qldb/ql_btree_delta.h"
+#include "ledger/common/slice.h"
 
 namespace ledgebase {
 

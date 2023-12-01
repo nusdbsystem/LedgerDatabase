@@ -1,16 +1,16 @@
 #===== Parameters to Fill =====
 
 # project root directory
-rootdir=/users/yc/LedgerDatabase
+rootdir=
 
 # log directory
-logdir="/data/yc/logs"
+logdir=
 
 # master node ip address
-master=10.10.10.206
+master=
 
 # init file directory
-initfile=/data/yc/ustore/tpcc/tpcc
+initfile=
 
 #==============================
 

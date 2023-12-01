@@ -17,8 +17,7 @@ LedgerDB::LedgerDB(int timeout,
                    std::string dbpath,
                    std::string ledgerPath) {
   db_.Open(dbpath);
-  ledger_.Open(ledgerPath);
-  mt_.reset(new MerkleTree(&ledger_));
+  mt_.reset(new MerkleTree(&db_));
   sl_.reset(new SkipList(&db_));
   next_block_seq_ = 0;
   commit_seq_ = 0;
@@ -55,7 +54,7 @@ void LedgerDB::buildTree(int timeout) {
       last_block = blk.blk_seq;
       added = true;
       std::string mt_blk_val;
-      ledger_.Get("ledger-"+std::to_string(blk.blk_seq), &mt_blk_val);
+      db_.Get("ledger-"+std::to_string(blk.blk_seq), &mt_blk_val);
       auto hash = Hash::ComputeFrom(mt_blk_val);
       mt_new_hashes.push_back(hash.ToBase32());
       for (size_t i = 0; i < blk.mpt_ks.size(); i++) {
@@ -82,7 +81,7 @@ void LedgerDB::buildTree(int timeout) {
       std::string prev_digest;
       if (commit_seq_ > 0) {
         std::string commit_info;
-        ledger_.Get("commit" + prev_commit_seq, &commit_info);
+        db_.Get("commit" + prev_commit_seq, &commit_info);
         prev = CommitInfo(commit_info);
         mpt_root = Hash::FromBase32(prev.mptroot);
         prev_digest = Hash::FromBase32(commit_info).ToBase32();
@@ -96,10 +95,10 @@ void LedgerDB::buildTree(int timeout) {
 
       std::string commit_entry = CommitInfo(commit_seq_, prev_digest,
           last_block, root_hash, root_key, newmptroot.ToBase32()).ToString();
-      ledger_.Put("commit" + std::to_string(commit_seq_), commit_entry);
+      db_.Put("commit" + std::to_string(commit_seq_), commit_entry);
       std::string newdigest = DigestInfo(commit_seq_, last_block,
           Hash::ComputeFrom(commit_entry).ToBase32()).ToString();
-      ledger_.Put("digest", newdigest);
+      db_.Put("digest", newdigest);
       ++commit_seq_;
       gettimeofday(&t1, NULL);
       auto latency = (t1.tv_sec - t0.tv_sec)*1000000 + t1.tv_usec - t0.tv_usec;
@@ -122,7 +121,7 @@ uint64_t LedgerDB::Set(const std::vector<std::string> &keys,
   auto blk_seq_str = std::to_string(blk_seq);
   auto blk_key = "ledger-" + blk_seq_str;
   std::string blk_val = BlockData(keys, values).ToString();
-  ledger_.Put(blk_key, blk_val);
+  db_.Put(blk_key, blk_val);
 
   std::vector<std::string> mpt_ks;
   for (size_t i = 0; i < keys.size(); i++) {
@@ -231,7 +230,7 @@ bool LedgerDB::GetVersions(const std::vector<std::string> &keys,
 
 bool LedgerDB::GetRootDigest(uint64_t *blk_seq, std::string *root_digest) {
   std::string digestinfo;
-  ledger_.Get("digest", &digestinfo);
+  db_.Get("digest", &digestinfo);
   if (digestinfo.size() == 0) {
     *root_digest = "";
     *blk_seq = 0;
@@ -256,9 +255,9 @@ bool LedgerDB::GetProofs(const std::vector<std::string> &keys,
                          size_t *blk_seq,
                          std::string *mpt_digest) {
   std::string digest, commit;
-  ledger_.Get("digest", &digest);
+  db_.Get("digest", &digest);
   auto commit_seq = std::to_string(DigestInfo(digest).commit_seq);
-  ledger_.Get("commit" + commit_seq, &commit);
+  db_.Get("commit" + commit_seq, &commit);
   CommitInfo cinfo(commit);
   std::string mt_root_key = cinfo.mtrootkey;
   *root_digest = cinfo.mtroot;
@@ -286,14 +285,14 @@ bool LedgerDB::GetProofs(const std::vector<std::string> &keys,
 Auditor LedgerDB::GetAudit(const uint64_t seq) {
   Auditor auditor;
   std::string digest;
-  ledger_.Get("digest", &digest);
+  db_.Get("digest", &digest);
   DigestInfo dinfo(digest);
   auditor.digest = dinfo.digest;
 
   std::string target_commit;
   for (size_t i = seq; i <= dinfo.tip_block; ++i) {
     std::string c;
-    ledger_.Get("commit"+std::to_string(i), &c);
+    db_.Get("commit"+std::to_string(i), &c);
     auditor.commits.emplace_back(c);
     if (i == seq) {
       target_commit = c;
@@ -305,7 +304,7 @@ Auditor LedgerDB::GetAudit(const uint64_t seq) {
 
   if (seq > 0) {
     std::string prev_commit;
-    ledger_.Get("commit"+std::to_string(seq-1), &prev_commit);
+    db_.Get("commit"+std::to_string(seq-1), &prev_commit);
     auditor.first_block_seq = CommitInfo(prev_commit).tip_block + 1;
   } else {
     auditor.first_block_seq = 0;
@@ -315,7 +314,7 @@ Auditor LedgerDB::GetAudit(const uint64_t seq) {
   auto mpt = Trie(&db_, mpt_hash);
   for (size_t i = auditor.first_block_seq; i <= cinfo.tip_block; ++i) {
     std::string blockdata;
-    ledger_.Get("ledger-" + std::to_string(i), &blockdata);
+    db_.Get("ledger-" + std::to_string(i), &blockdata);
     auditor.blocks.emplace_back(blockdata);
     BlockData binfo(blockdata);
     for (size_t j = 0; j < binfo.keys.size(); ++j) {

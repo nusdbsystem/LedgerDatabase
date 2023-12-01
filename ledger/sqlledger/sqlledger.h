@@ -56,6 +56,8 @@ class SQLLedger {
 
   Auditor getAudit(const uint64_t& seq);
 
+  size_t size() { return db_.size(); }
+
  private:
 
   Logger logger_;
@@ -68,7 +70,6 @@ class SQLLedger {
   uint64_t tid_;
   boost::shared_mutex lock_;
   boost::shared_mutex buffer_lock_;
-  std::unique_ptr<qldb::QLDBStore> qlstore_;
   std::unique_ptr<qldb::QLBTree> indexed_;
   std::unique_ptr<qldb::QLBTree> history_;
   Hash dummy_;

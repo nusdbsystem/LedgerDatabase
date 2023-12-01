@@ -8,7 +8,7 @@ namespace qldb {
 
 Chunk QLBTree::kEmptyMap = QLBTreeMap::EmptyMap();
 
-QLBTree::QLBTree(QLDBStore* db, const std::string& prefix) noexcept :
+QLBTree::QLBTree(DB* db, const std::string& prefix) noexcept :
     db_(db), prefix_(prefix) {
   auto chunk = db_->Get(prefix_ + "ROOT");
   if (chunk->empty()) {
@@ -17,7 +17,7 @@ QLBTree::QLBTree(QLDBStore* db, const std::string& prefix) noexcept :
     root_node_ = QLBTreeNode::CreateFromChunk(chunk);
   }
   
-  delta_.reset(new QLBTreeDelta(db_));
+  delta_.reset(new QLBTreeDelta(db));
 }
 
 Slice QLBTree::Get(const Slice& key) const {

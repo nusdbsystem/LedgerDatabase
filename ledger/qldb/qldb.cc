@@ -39,14 +39,14 @@ bool QLProofResult::Verify(const Hash digest) {
   return doc_hash == digest;
 }
 
-QLDB::QLDB() {
-  db_.reset(new QLDBStore());
-  indexed_.reset(new QLBTree(db_.get(), "COMMITTED_"));
-  history_.reset(new QLBTree(db_.get(), "HISTORY_"));
+QLDB::QLDB(std::string dbpath) {
+  db_.Open(dbpath);
+  indexed_.reset(new QLBTree(&db_, "COMMITTED_"));
+  history_.reset(new QLBTree(&db_, "HISTORY_"));
 }
 
 void QLDB::CreateLedger(const std::string& name) {
-  db_->Put(name, Slice("0"));
+  db_.Put(name, "0");
 }
 
 Slice QLDB::GetData(const std::string& name,
@@ -58,7 +58,7 @@ Slice QLDB::GetData(const std::string& name,
 
 Chunk QLDB::GetCommitted(const std::string& name,
     const std::string& key) const {
-  // auto result = db_->Get(name + "|" + key);
+  // auto result = db_.Get(key);
   // return Chunk(result->head());
   auto combined_key = key;
   auto result = indexed_->Get(Slice(combined_key));
@@ -67,7 +67,7 @@ Chunk QLDB::GetCommitted(const std::string& name,
 
 std::map<std::string, std::string> QLDB::Range(const std::string& name,
     const std::string& from, const std::string& to) const {
-  // auto result = db_->Get(name + "|" + key);
+  // auto result = db_.Get(name + "|" + key);
   // return Chunk(result->head());
   auto result = indexed_->Range(Slice(from), Slice(to));
   return result;
@@ -75,9 +75,9 @@ std::map<std::string, std::string> QLDB::Range(const std::string& name,
 
 Chunk QLDB::GetVersion(const std::string& name, const std::string& key, 
     const size_t version) const {
-  // auto result = db_->Get(name + "|" + key + "|" + std::to_string(version));
-  // return Chunk(result->head());
   auto combined_key = key + "|" + std::to_string(version);
+  // auto result = db_.Get(combined_key);
+  // return Chunk(result->head());
   auto result = history_->Get(Slice(combined_key));
   return Chunk(result.data());
 }
@@ -106,7 +106,8 @@ bool QLDB::Set(const std::string& name,
   }
 
   // get block sequence number and hash
-  auto tip = db_->GetString(name);
+  std::string tip;
+  db_.Get(name, &tip);
   uint64_t seqno;
   Hash prev_hash;
   if (tip.compare("") == 0) {
@@ -145,11 +146,10 @@ bool QLDB::Set(const std::string& name,
     proof.emplace_back(doc_hash.Clone());
 
     // use rocksdb
-    // std::string indexed_key = name + "|" + keys[i];
-    // db_->Put(indexed_key, document);
-    // std::string history_key = name + "|" + keys[i] + "|" +
-    //     std::to_string(version);
-    // db_->Put(history_key, document);
+    // std::string indexed_key = keys[i];
+    // db_.Put(indexed_key, document);
+    // std::string history_key = keys[i] + "|" + std::to_string(version);
+    // db_.Put(history_key, document);
 
     documents.emplace_back(std::move(document));
 
@@ -163,6 +163,7 @@ bool QLDB::Set(const std::string& name,
   }
   indexed_->Set(ks, vs);
   history_->Set(hist_keys, vs);
+
   // block hash
   proof.emplace_back(prev_hash.Clone());
 
@@ -188,9 +189,9 @@ bool QLDB::Set(const std::string& name,
       now, block_hash, prev_hash, documents);
 
   // write to ledger storage
-  db_->Put(block_key, block);
+  db_.Put(block_key, block);
   std::string new_tip = std::to_string(seqno) + "|" + block_hash.ToBase32();
-  db_->Put(name, Slice(new_tip));
+  db_.Put(name, new_tip);
 
   return true;
 }
@@ -226,7 +227,7 @@ Hash QLDB::calculateBlockHash(const std::vector<Hash>& proof,
       }
       std::string key = "proof_" + name + "|" + std::to_string(seqno) + "|" +
           std::to_string(level) + "|" + std::to_string(i);
-      db_->Put(key, Slice(node.get(), node_size));
+      db_.Put(key, Slice(node.get(), node_size).ToString());
       Hash pr_hash = Hash::ComputeFrom(node.get(), node_size);
       current.emplace_back(pr_hash.Clone());
     }
@@ -252,7 +253,7 @@ void QLDB::calculateDigest(const Hash& block_hash, const Hash& prev_block_hash,
     if (pr_last_idx == 0) {
       byte_t node[Hash::kByteLength];
       memcpy(node, curr_hash.value(), Hash::kByteLength);
-      db_->Put(key, Slice(node, Hash::kByteLength));
+      db_.Put(key, Slice(node, Hash::kByteLength).ToString());
       curr_hash = Hash::ComputeFrom(node, Hash::kByteLength);
     } else {
       Hash prev_hash;
@@ -261,14 +262,15 @@ void QLDB::calculateDigest(const Hash& block_hash, const Hash& prev_block_hash,
       } else {
         std::string prev_key = "proof_" + name + "|" + std::to_string(level-1) +
             "|" + std::to_string(last_seqno - 1);
-        auto prev_node_str = db_->GetString(prev_key);
+        std::string prev_node_str;
+        db_.Get(prev_key, &prev_node_str);
         Slice prev_node(prev_node_str);
         prev_hash = Hash::ComputeFrom(prev_node.data(), Hash::kByteLength * 2);
       }
       byte_t node[Hash::kByteLength * 2];
       memcpy(node, prev_hash.value(), Hash::kByteLength);
       memcpy(node + Hash::kByteLength, curr_hash.value(), Hash::kByteLength);
-      db_->Put(key, Slice(node, Hash::kByteLength * 2));
+      db_.Put(key, Slice(node, Hash::kByteLength * 2).ToString());
       curr_hash = Hash::ComputeFrom(node, Hash::kByteLength * 2);
     }
     last_seqno = pr_last;
@@ -276,13 +278,14 @@ void QLDB::calculateDigest(const Hash& block_hash, const Hash& prev_block_hash,
 
   std::string key = "digest_" + name;
   std::string digest = curr_hash.ToBase32();
-  db_->Put(key, Slice(digest));
+  db_.Put(key, digest);
 }
 
 DigestInfo QLDB::digest(const std::string& name) {
   std::string key = "digest_" + name;
-  auto digest = db_->GetString(key);
-  auto tip = db_->GetString(name);
+  std::string digest, tip;
+  db_.Get(key, &digest);
+  db_.Get(name, &tip);
   if (tip.compare("") == 0) {
     return {0, digest};
   } else {
@@ -296,7 +299,7 @@ QLProofResult QLDB::getProof(const std::string& name, const uint64_t tip,
     const uint64_t block_addr, const uint32_t doc_seq) {
   if (block_addr > tip) return {};
   std::string block_key = name + "|" + std::to_string(block_addr);
-  auto block = db_->Get(block_key);
+  auto block = db_.Get(block_key);
   QLBlock qb(block);
   auto doc_size = qb.getDocumentSize() + 2;
   if (doc_seq > doc_size) return {};
@@ -319,7 +322,8 @@ QLProofResult QLDB::getProof(const std::string& name, const uint64_t tip,
     } else {
       std::string key = "proof_" + name + "|" + std::to_string(block_addr) +
           "|" + std::to_string(level) + "|" + std::to_string(pr_seq);
-      auto nodestr = db_->GetString(key);
+      std::string nodestr;
+      db_.Get(key, &nodestr);
       Slice node(nodestr);
       Hash hash(node.data() + Hash::kByteLength * pr_seq_idx);
       // std::cerr << level << ", " << pr_seq << ": " << Hash(node.data()) << ", " << Hash(node.data() + Hash::kByteLength) << std::endl;
@@ -343,7 +347,8 @@ QLProofResult QLDB::getProof(const std::string& name, const uint64_t tip,
     if (curr_seq == latest && latest % 2 == 0) {
       result.proof.emplace_back(Hash().ToBase32());
     } else {
-      auto nodestr = db_->GetString(key);
+      std::string nodestr;
+      db_.Get(key, &nodestr);
       Slice node(nodestr);
       // std::cerr << "block_" << level << ", " << pr_seq << ": " << Hash(node.data()) << ", " << Hash(node.data() + Hash::kByteLength) << std::endl;
       Hash hash(node.data() + pr_seq_idx * Hash::kByteLength);

@@ -3,7 +3,7 @@
 
 #include <map>
 
-#include "ledger/qldb/qldb_store.h"
+#include "ledger/common/db.h"
 #include "ledger/common/chunk.h"
 
 namespace ledgebase {
@@ -12,7 +12,7 @@ namespace qldb {
 
 class QLBTreeDelta {
  public:
-  QLBTreeDelta(QLDBStore* db) : db_(db) {}
+  QLBTreeDelta(DB* db) : db_(db) {}
   ~QLBTreeDelta() = default;
 
   void Commit(const std::string& id, bool isroot, const std::string& prefix);
@@ -43,7 +43,7 @@ class QLBTreeDelta {
   inline std::map<std::string, Chunk>& dirty() {return dirty_;}
 
  protected:
-  QLDBStore* db_;
+  DB* db_;
   std::map<std::string, Chunk> dirty_;
 };
 

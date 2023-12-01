@@ -6,16 +6,6 @@ namespace ledgebase {
 
 namespace qldb {
 
-QLDBStore::QLDBStore() : QLDBStore("/tmp/qldb.store", true) {}
-
-QLDBStore::QLDBStore(const std::string& db_path, const bool persist)
-  : persist_(persist) {
-  db_opts_.error_if_exists = false;
-  db_opts_.create_if_missing = true;
-
-  rocksdb::DB::Open(db_opts_, db_path, &db_);
-}
-
 std::string QLDBStore::GetString(const std::string& key) {
   rocksdb::PinnableSlice value;
   if (db_->Get(rocksdb::ReadOptions(), db_->DefaultColumnFamily(),
@@ -46,12 +36,17 @@ const Chunk* QLDBStore::Get(const std::string& key) {
 }
 
 bool QLDBStore::Put(const std::string& key, const Slice& value) {
+  auto res = GetString(key);
+  total_ = total_ + (res.size() > 0? 0:key.size()) + value.len() - res.size();
   return db_->Put(rocksdb::WriteOptions(), rocksdb::Slice(key),
                   rocksdb::Slice(reinterpret_cast<const char*>(value.data()),
                                  value.len())).ok();
 }
 
 bool QLDBStore::Put(const std::string& key, const Chunk& chunk) {
+  auto res = Get(key);
+  total_ = total_ + res->empty()? (key.size() + chunk.numBytes()): (chunk.numBytes() - res->numBytes());
+  std::cout << total_ << std::endl;
   cache_.erase(key);
   return db_->Put(rocksdb::WriteOptions(), rocksdb::Slice(key),
                   rocksdb::Slice(reinterpret_cast<const char*>(chunk.head()),

@@ -5,9 +5,9 @@
 #include <map>
 
 #include "ledger/common/chunk.h"
+#include "ledger/common/db.h"
 #include "ledger/common/slice.h"
 #include "ledger/qldb/ql_btree_node.h"
-#include "ledger/qldb/qldb_store.h"
 
 namespace ledgebase {
 
@@ -16,7 +16,7 @@ namespace qldb {
 class QLBTree {
  public:
   static Chunk kEmptyMap;
-  QLBTree(QLDBStore* db, const std::string& prefix) noexcept;
+  QLBTree(DB* db, const std::string& prefix) noexcept;
   QLBTree& operator=(QLBTree&&) = default;
   ~QLBTree() = default;
 
@@ -45,7 +45,7 @@ class QLBTree {
   void FindKey(const Chunk* node, const Slice& from,
       const Slice& to, std::map<std::string, std::string>& result) const;
 
-  QLDBStore* db_;
+  DB* db_;
   std::string prefix_;
   std::unique_ptr<const QLBTreeNode> root_node_;
   std::unique_ptr<QLBTreeDelta> delta_;

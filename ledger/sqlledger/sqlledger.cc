@@ -13,9 +13,8 @@ SQLLedger::SQLLedger(int t, const std::string& dbpath) :
   tid_ = 0;
   buffer_.reset(new std::map<uint64_t, std::vector<std::string>>());
   buildThread_.reset(new std::thread(&SQLLedger::updateLedger, this, t));
-  qlstore_.reset(new qldb::QLDBStore());
-  indexed_.reset(new qldb::QLBTree(qlstore_.get(), "COMMITTED_"));
-  history_.reset(new qldb::QLBTree(qlstore_.get(), "HISTORY_"));
+  indexed_.reset(new qldb::QLBTree(&db_, "COMMITTED_"));
+  history_.reset(new qldb::QLBTree(&db_, "HISTORY_"));
   dummy_ = Hash::ComputeFrom("0");
 }
 
@@ -245,7 +244,7 @@ bool SQLLedgerProof::Verify() {
   if (blk_mt_root.compare(blk_proof.digest) != 0) {
     //std::cout << "verification failed at txn mt root" << std::endl;
   }
-  std::cout << "txn ";
+  //std::cout << "txn ";
   if (!blk_proof.Verify()) {
     //std::cout << "verification failed at txn tree" << std::endl;
   }

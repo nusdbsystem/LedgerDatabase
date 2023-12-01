@@ -55,7 +55,7 @@ int taskGenerator(int clientid, int tid, int timeout) {
     
     Task task;
     task.from = rand() % 89999 + 10000;
-    auto range = rand() % 10 + 10;
+    auto range = rand() % 10 + 50;
     task.to = task.from + range;
     task_queue.push(task);
   }

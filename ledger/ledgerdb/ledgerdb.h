@@ -130,13 +130,13 @@ class LedgerDB {
   bool GetRootDigest(uint64_t *blk_seq,
                      std::string *root_digest);
 
-  inline size_t size() { return db_.size() + ledger_.size(); }
+  inline size_t size() { return db_.size(); }
 
  private:
   std::string splitAndFind(const std::string &str, char delim, const::std::string &target);
 
   DB db_;
-  DB ledger_;
+  //DB ledger_;
   std::atomic<bool> stop_;
   uint64_t next_block_seq_;
   uint64_t commit_seq_;

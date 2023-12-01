@@ -39,8 +39,27 @@ class DB {
     return rocksdb::DB::Open(options_db, db_path, &db_).ok();
   }
 
+  inline void CreateCache(const std::string& id, Chunk&& chunk) {
+    m_cache_.emplace(id, std::move(chunk));
+  }
+
   inline bool Get(const std::string& key, std::string* value) const {
     return db_->Get(rocksdb::ReadOptions(), key, value).ok();
+  }
+
+  inline Chunk* Get(const std::string& key) {
+    auto it = m_cache_.find(key);
+    if (it != m_cache_.end()) {
+      return &it->second;
+    }
+    rocksdb::PinnableSlice value;
+    if (db_->Get(rocksdb::ReadOptions(), db_->DefaultColumnFamily(),
+                rocksdb::Slice(key), &value).ok()) {
+      m_cache_.emplace(key, ToChunk(value));
+    } else {
+      m_cache_.emplace(key, Chunk());
+    }
+    return &m_cache_[key];
   }
 
   inline Chunk* Get(const Hash& key) {
@@ -72,16 +91,35 @@ class DB {
   }
 
   inline bool Put(const Hash& key, const Chunk& chunk) {
-    rocksdb::PinnableSlice pin_val;
+    //rocksdb::PinnableSlice pin_val;
     const auto key_slice = ToRocksSlice(key);
-    if (!db_->Get(rocksdb::ReadOptions(), db_->DefaultColumnFamily(), key_slice, &pin_val).ok()) {
-      total_ += Hash::kByteLength + chunk.numBytes();
-    }
+    //if (!db_->Get(rocksdb::ReadOptions(), db_->DefaultColumnFamily(), key_slice, &pin_val).ok()) {
+    //  total_ += (long) (Hash::kByteLength + chunk.numBytes());
+    //}
     return db_->Put(rocksdb::WriteOptions(), key_slice, ToRocksSlice(chunk)).ok();
   }
 
+  inline bool Put(const std::string& key, const Chunk& value) {
+    //auto res = Get(key);
+    //long temp = total_;
+    //total_ = total_ + (res->empty()? (long) (key.size() + value.numBytes()):
+    //    ((long) value.numBytes() - (long) res->numBytes()));
+    //if (temp > total_) {std::cout << "[Error]" << std::endl;}
+    //std::cout << total_ << std::endl;
+    m_cache_.erase(key);
+    return db_->Put(rocksdb::WriteOptions(), rocksdb::Slice(key),
+        rocksdb::Slice(reinterpret_cast<const char*>(value.head()),
+        value.numBytes())).ok();
+  }
+
   inline bool Put(const std::string& key, const std::string& val) {
-    total_ += key.size() + val.size();
+    //std::string res;
+    //Get(key, &res);
+    //long temp = total_;
+    //total_ = total_ + (res.size() > 0? ((long) val.size() - (long) res.size())
+    //    : (long)(key.size() + val.size()));
+    //if (temp > total_) {std::cout << "[Error]" << std::endl;}
+    //std::cout << total_ << std::endl;
     return db_->Put(rocksdb::WriteOptions(), key, val).ok();
   }
 
@@ -93,7 +131,7 @@ class DB {
     return db_->NewIterator(rocksdb::ReadOptions());
   }
 
-  inline size_t size() { return total_; }
+  inline long size() { return total_; }
 
  private:
   inline Chunk ToChunk(const rocksdb::Slice& x) const {
@@ -114,8 +152,9 @@ class DB {
   }
 
   rocksdb::DB* db_;
-  size_t total_;
+  long total_;
   tbb::concurrent_hash_map<std::string, Chunk> cache_;
+  std::unordered_map<std::string, Chunk> m_cache_;
 };
 
 }  // namespace ledgebase
