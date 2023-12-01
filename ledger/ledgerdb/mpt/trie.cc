@@ -439,8 +439,9 @@ bool MPTProof::VerifyProof(const Hash& digest, const std::string& key) const {
     auto nodestr = GetMapChunk(i);
     Chunk chunk(reinterpret_cast<const unsigned char*>(nodestr.c_str()));
     auto calculated = chunk.hash();
-    if (target != calculated)
+    if (target != calculated) {
       return false;
+    }
 
     if (chunk.type() == ChunkType::kMPTFull) {
       ++pos;
@@ -477,8 +478,6 @@ bool MPTProof::VerifyProof(const Hash& digest, const std::string& key) const {
         auto curr_key = key.substr(pos);
         size_t match_len = MPTConfig::PrefixLen(curr_key, target_key);
         if (match_len != target_key.size()) {
-          return true;
-        } else {
           return false;
         }
       }

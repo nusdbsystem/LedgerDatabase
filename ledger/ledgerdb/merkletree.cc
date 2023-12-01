@@ -59,10 +59,8 @@ void MerkleTree::update(const uint64_t starting_block_seq,
       } else {
         auto parent = Hash::ComputeFrom(level_hashes[i].value(),
             Hash::kByteLength);
-        if (i == level_hashes.size() - 1) {
-          parent_key += "-" + commit_seq;
-          complete = false;
-        }
+        parent_key += "-" + commit_seq;
+        complete = false;
         ledger_->Put(parent_key, parent.ToBase32());
         parent_hashes.emplace_back(parent.Clone());
       }
@@ -96,13 +94,17 @@ Proof MerkleTree::getProof(const std::string& commit_seq,
   for (int i = 0; i < level; ++i) {
     std::string res;
     if (ptr % 2  == 0) {
-      std::string sibling_key =
-          "mt" + std::to_string(i) + "-" + std::to_string(ptr+1);
-      if (ptr + 1 == last && i > 0 && !complete) {
-        sibling_key += "-" + commit_seq;
-      }
-      ledger_->Get(sibling_key, &res);
       proof.pos.emplace_back(1);
+      if (ptr == last) {
+        res = "";
+      } else {
+        std::string sibling_key =
+            "mt" + std::to_string(i) + "-" + std::to_string(ptr+1);
+        if (ptr + 1 == last && i > 0 && !complete) {
+          sibling_key += "-" + commit_seq;
+        }
+        ledger_->Get(sibling_key, &res);
+      }
     } else {
       std::string sibling_key =
           "mt" + std::to_string(i) + "-" + std::to_string(ptr-1);

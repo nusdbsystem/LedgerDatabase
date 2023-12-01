@@ -39,9 +39,9 @@ public:
     bool Commit();
     bool Commit(std::map<int, std::map<uint64_t, std::vector<std::string>>>& keys);
     void Abort();
-    int Verify(std::map<int, std::map<uint64_t, std::vector<std::string>>>& keys);
+    bool Verify(std::map<int, std::map<uint64_t, std::vector<std::string>>>& keys);
     std::vector<int> Stats();
-    int Audit(std::map<int, uint64_t>& seqs);
+    bool Audit(std::map<int, uint64_t>& seqs);
 
 private:
     /* Private helper functions. */

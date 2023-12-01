@@ -16,12 +16,6 @@ vLatency = []
 nkey = 0
 nkeys = []
 
-tExtra = 0.0
-sExtra = 0.0
-fExtra = 0.0
-
-xLatency = []
-
 for line in open(sys.argv[1]):
   if line.startswith('#') or line.strip() == "":
     continue
@@ -48,11 +42,6 @@ for line in open(sys.argv[1]):
   latency = int(line[3])
   status = int(line[4])
   op = int(line[5])
-  ttype = -1
-  extra = 0
-
-  if status == 1 and ttype == 2:
-    xLatency.append(latency)
 
   if op == 0:
     rLatency.append(latency)
@@ -65,14 +54,11 @@ for line in open(sys.argv[1]):
     vLatency.append(latency)
 
   tLatency.append(latency) 
-  tExtra += extra
 
   if status == 1:
     sLatency.append(latency)
-    sExtra += extra
   else:
     fLatency.append(latency)
-    fExtra += extra
 
 if len(tLatency) == 0:
   print "Zero completed transactions.."

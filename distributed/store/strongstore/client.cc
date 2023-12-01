@@ -441,9 +441,9 @@ Client::Abort()
     }
 }
 
-int Client::Verify(std::map<int, std::map<uint64_t, std::vector<std::string>>>& keys) {
+bool Client::Verify(std::map<int, std::map<uint64_t, std::vector<std::string>>>& keys) {
     // Contact the appropriate shard to set the value.
-    int status = REPLY_OK;
+    bool is_successful = true;
 
 #ifndef AMZQLDB
     list<Promise*> promises;
@@ -491,19 +491,20 @@ int Client::Verify(std::map<int, std::map<uint64_t, std::vector<std::string>>>& 
     std::cout << "verifynkeys " << nkeys << std::endl;
 
     for (auto& p : promises) {
-        if (p->GetReply() != REPLY_OK) {
-          status = p->GetReply();
+        if (p->GetReply() != REPLY_OK ||
+            p->GetVerifyStatus() != VerifyStatus::PASS) {
+          is_successful = false;
         }
         delete p;
     }
 #endif
 
-    return status;
+    return is_successful;
 }
 
-int Client::Audit(std::map<int, uint64_t>& seqs) {
+bool Client::Audit(std::map<int, uint64_t>& seqs) {
     // Contact the appropriate shard to set the value.
-    int status = REPLY_OK;
+    bool status = true;
     list<Promise *> promises;
 
     if (seqs.size() == 0) {
@@ -520,7 +521,7 @@ int Client::Audit(std::map<int, uint64_t>& seqs) {
     int n = 0;
     for (auto p : promises) {
         if (p->GetReply() != REPLY_OK) {
-          status = p->GetReply();
+          status = false;
         } else if (p->GetVerifyStatus() != VerifyStatus::UNVERIFIED) {
           ++seqs[n];
         }
