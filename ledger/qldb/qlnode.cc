@@ -8,7 +8,7 @@ Chunk Document::Encode(const Slice& key,
                        const Slice& val,
                        const BlockAddress& addr,
                        const MetaData& meta) {
-  auto ledger_nm_bytes = addr.ledger_name.len();
+  auto ledger_nm_bytes = uint32_t(addr.ledger_name.len());
   auto key_bytes = key.len();
   auto entry_bytes = key.len() + val.len() + sizeof(uint32_t) * 2;
   size_t bytes = Document::fixed_length + key.len() + val.len()

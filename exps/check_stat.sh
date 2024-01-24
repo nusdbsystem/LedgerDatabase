@@ -13,5 +13,5 @@ done
 for host in `cat clients`
 do
   echo client $host
-  ssh $host "pgrep rangeClient"
+  ssh $host "pgrep verifyClient"
 done

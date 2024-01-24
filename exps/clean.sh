@@ -4,7 +4,7 @@ for server in `cat replicas`
 do
   echo ${server}
   rsync -a ${expdir} ${server}:${rootdir}/
-  ssh ${server} "killall -9 strongstore; rm -rf ${logdir}; mkdir -p /tmp/testdb; mkdir -p /tmp/testledger; rm -rf /tmp/testdb/*; rm -rf /tmp/testledger/*; rm -rf /tmp/qldb.store/"
+  ssh ${server} "killall -9 strongstore; rm -rf ${logdir}; mkdir -p /tmp/testdb; mkdir -p /tmp/testledger; rm -rf /tmp/testdb/*; rm -rf /tmp/testledger/*; rm -rf /tmp/qldb.store/; rm -rf /tmp/replica*.store;"
 done
 
 for client in `cat clients`

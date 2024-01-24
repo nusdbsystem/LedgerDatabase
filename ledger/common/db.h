@@ -40,7 +40,8 @@ class DB {
   }
 
   inline void CreateCache(const std::string& id, Chunk&& chunk) {
-    m_cache_.emplace(id, std::move(chunk));
+    tbb::concurrent_hash_map<std::string, Chunk>::accessor a;
+    m_cache_.insert(a, std::make_pair(id, std::move(chunk)));
   }
 
   inline bool Get(const std::string& key, std::string* value) const {
@@ -48,18 +49,15 @@ class DB {
   }
 
   inline Chunk* Get(const std::string& key) {
-    auto it = m_cache_.find(key);
-    if (it != m_cache_.end()) {
-      return &it->second;
-    }
-    rocksdb::PinnableSlice value;
-    if (db_->Get(rocksdb::ReadOptions(), db_->DefaultColumnFamily(),
-                rocksdb::Slice(key), &value).ok()) {
-      m_cache_.emplace(key, ToChunk(value));
+    tbb::concurrent_hash_map<std::string, Chunk>::accessor a;
+    if (m_cache_.find(a, key)) return &(a->second);
+    std::string value;
+    if (db_->Get(rocksdb::ReadOptions(), key, &value).ok()) {
+      m_cache_.insert(a, std::make_pair(key, ToChunk(value)));
     } else {
-      m_cache_.emplace(key, Chunk());
+      m_cache_.insert(a, std::make_pair(key, Chunk()));
     }
-    return &m_cache_[key];
+    return &(a->second);
   }
 
   inline Chunk* Get(const Hash& key) {
@@ -154,7 +152,7 @@ class DB {
   rocksdb::DB* db_;
   long total_;
   tbb::concurrent_hash_map<std::string, Chunk> cache_;
-  std::unordered_map<std::string, Chunk> m_cache_;
+  tbb::concurrent_hash_map<std::string, Chunk> m_cache_;
 };
 
 }  // namespace ledgebase
