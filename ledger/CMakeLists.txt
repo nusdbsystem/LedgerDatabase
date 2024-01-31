@@ -17,7 +17,11 @@ AUX_SOURCE_DIRECTORY(sqlledger sqlledger_srcs)
 LIST(APPEND ledger_srcs ${sqlledger_srcs})
 
 ADD_LIBRARY(ledger_objs OBJECT ${ledger_srcs})
-ADD_LIBRARY(ledger SHARED $<TARGET_OBJECTS:ledger_objs>)
+if (BUILD_STATIC_LIBS)
+  ADD_LIBRARY(ledger STATIC $<TARGET_OBJECTS:ledger_objs>)
+else()
+  ADD_LIBRARY(ledger SHARED $<TARGET_OBJECTS:ledger_objs>)
+endif()
 
 LIST(APPEND LEDGER_LINKER_LIBS tbb)
 TARGET_LINK_LIBRARIES(ledger ${LEDGER_LINKER_LIBS})
