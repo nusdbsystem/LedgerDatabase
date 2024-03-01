@@ -12,11 +12,11 @@ VersionedKVStore::VersionedKVStore(const string& db_path, int timeout) {
   ldb.reset(new ledgebase::ledgerdb::LedgerDB(timeout));
 #endif
 #ifdef AMZQLDB
-  ledgebase::qldb::BPlusConfig::Init(45, 45);
+  ledgebase::qldb::BPlusConfig::Init(45, 15);
   qldb_.reset(new ledgebase::qldb::QLDB(db_path));
 #endif
 #ifdef SQLLEDGER
-  ledgebase::qldb::BPlusConfig::Init(45, 45);
+  ledgebase::qldb::BPlusConfig::Init(45, 25);
   sqlledger_.reset(new ledgebase::sqlledger::SQLLedger(timeout, db_path));
 #endif
 }

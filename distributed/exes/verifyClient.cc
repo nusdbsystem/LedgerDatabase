@@ -99,7 +99,7 @@ int taskGenerator(int clientid, int tid, int tlen, int wPer, int rPer, int timeo
         op = 0;
       } else {
         op = 2;
-        n = rand() % 10;
+        n = 20;
       }
       task.keys.emplace_back(key);
       task.vals.emplace_back(val);
