@@ -108,10 +108,9 @@ message MPTProof {
 }
 
 message SQLLedgerProof {
-    optional MTProof blk_proof = 1;
-    optional MTProof txn_proof = 2;
-    repeated bytes blocks = 3;
-    optional bytes digest = 4;
+    repeated bytes blocks = 1;
+    repeated MTProof txn_proof = 2;
+    repeated MTProof data_proof = 3;
 }
 
 message Range {

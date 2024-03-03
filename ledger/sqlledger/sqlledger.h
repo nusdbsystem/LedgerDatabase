@@ -12,13 +12,17 @@ namespace ledgebase {
 
 namespace sqlledger {
 
-struct SQLLedgerProof {
-  Proof txn_proof;
-  Proof blk_proof;
+struct BlockProof {
   std::vector<std::string> blks;
-  std::string digest;
 
-  bool Verify();
+  bool Verify(const std::string& hash, std::string* mt_blk_root);
+};
+
+struct DetailProof {
+  Proof txn_proof;
+  Proof data_proof;
+
+  bool Verify(const std::string& Hash);
 };
 
 struct Auditor {
@@ -51,8 +55,12 @@ class SQLLedger {
       const std::string& to);
   
   std::vector<std::string> GetHistory(const std::string& key, size_t n);
-      
-  SQLLedgerProof getProof(const std::string& key, const uint64_t block_addr);
+
+  BlockProof getBlockProof(const uint64_t block_addr, const uint64_t tip, 
+      int* level);
+
+  DetailProof getDetailProof(const std::string& key, const uint64_t block_addr,
+      int level);
 
   Auditor getAudit(const uint64_t& seq);
 

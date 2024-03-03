@@ -16,7 +16,7 @@ VersionedKVStore::VersionedKVStore(const string& db_path, int timeout) {
   qldb_.reset(new ledgebase::qldb::QLDB(db_path));
 #endif
 #ifdef SQLLEDGER
-  ledgebase::qldb::BPlusConfig::Init(45, 25);
+  ledgebase::qldb::BPlusConfig::Init(45, 45);
   sqlledger_.reset(new ledgebase::sqlledger::SQLLedger(timeout, db_path));
 #endif
 }
@@ -271,27 +271,32 @@ bool VersionedKVStore::GetProof(
 #ifdef SQLLEDGER
   GetDigest(reply);
   for (auto& entry : keys) {
+    int level;
+
+    auto block_proof = sqlledger_->getBlockProof(entry.first,
+        reply->digest().block(), &level);
+    //ledgebase::sqlledger::BlockProof block_proof;
+    auto p = reply->add_sproof();
+    for (size_t i = 0; i < block_proof.blks.size(); ++i) {
+      p->add_blocks(block_proof.blks[i]);
+    }
+
     for (auto& key : entry.second) {
       nkey++;
-      auto res = sqlledger_->getProof(key, entry.first);
-      auto p = reply->add_sproof();
-      auto blk_proof = p->mutable_blk_proof();
-      auto txn_proof = p->mutable_txn_proof();
-      p->set_digest(res.digest);
-      for (size_t i = 0; i < res.blks.size(); ++i) {
-        p->add_blocks(res.blks[i]);
-      }
-      blk_proof->set_digest(res.blk_proof.digest);
-      blk_proof->set_value(res.blk_proof.value);
-      for (size_t i = 0; i < res.blk_proof.proof.size(); ++i) {
-        blk_proof->add_proof(res.blk_proof.proof[i]);
-        blk_proof->add_pos(res.blk_proof.pos[i]);
-      }
+      auto res = sqlledger_->getDetailProof(key, entry.first, level);
+      auto txn_proof = p->add_txn_proof();
+      auto data_proof = p->add_data_proof();
       txn_proof->set_digest(res.txn_proof.digest);
       txn_proof->set_value(res.txn_proof.value);
       for (size_t i = 0; i < res.txn_proof.proof.size(); ++i) {
         txn_proof->add_proof(res.txn_proof.proof[i]);
         txn_proof->add_pos(res.txn_proof.pos[i]);
+      }
+      data_proof->set_digest(res.data_proof.digest);
+      data_proof->set_value(res.data_proof.value);
+      for (size_t i = 0; i < res.data_proof.proof.size(); ++i) {
+        data_proof->add_proof(res.data_proof.proof[i]);
+        data_proof->add_pos(res.data_proof.pos[i]);
       }
     }
   }
@@ -299,7 +304,7 @@ bool VersionedKVStore::GetProof(
 
   gettimeofday(&t1, NULL);
   auto lat = (t1.tv_sec - t0.tv_sec)*1000000 + t1.tv_usec - t0.tv_usec;
-  //std::cout << "getproof " << lat << " " << nkey << std::endl;
+  std::cout << "getproof " << lat << " " << nkey << std::endl;
   return true;
 }
 

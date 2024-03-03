@@ -179,31 +179,24 @@ std::vector<std::string> SQLLedger::GetHistory(const std::string& key,
   return retval;
 }
 
-SQLLedgerProof SQLLedger::getProof(const std::string& key,
-    const uint64_t block_addr) {
-  SQLLedgerProof proof;
-
-  // get digest
-  std::string value;
-  db_.Get("digest", &value);
-  auto digest = Utils::splitBy(value, '|');
-  proof.digest = digest[0];
-  int tip = std::stoul(digest[1]);
-
-  // get block
-  int level;
-  std::string blkroot;
-  //std::cout << "blocks " << (tip - block_addr) << std::endl;
+BlockProof SQLLedger::getBlockProof(const uint64_t block_addr,
+    const uint64_t tip, int* level) {
+  BlockProof proof;
   for (size_t i = block_addr; i <= tip; ++i) {
     std::string block;
     db_.Get("blk" + std::to_string(i), &block);
-    proof.blks.emplace_back(block);
+    proof.blks.push_back(block);
     if (i == block_addr) {
       auto blockinfo = Utils::splitBy(block, '|');
-      level = std::stoul(blockinfo[2]);
-      blkroot = blockinfo[1];
+      *level = std::stoul(blockinfo[2]);
     }
   }
+  return proof;
+}
+
+DetailProof SQLLedger::getDetailProof(const std::string& key,
+    const uint64_t block_addr, int level) {
+  DetailProof proof;
 
   std::string doc = GetDataAtBlock(key, block_addr);
   auto docitems = Utils::splitBy(doc, '|');
@@ -217,45 +210,44 @@ SQLLedgerProof SQLLedger::getProof(const std::string& key,
   auto txnroot = txnitems[3];
   auto txnrootlevel = std::stoul(txnitems[4]);
 
-  proof.blk_proof = mt_->GetProof("blk" + std::to_string(block_addr),
+  proof.txn_proof = mt_->GetProof("blk" + std::to_string(block_addr),
       level, txnseq);
-  proof.blk_proof.value = txn;
-  proof.txn_proof = mt_->GetProof("txn" + txnid, txnrootlevel, docseq);
-  proof.txn_proof.value = doc;
+  proof.txn_proof.value = txn;
+  proof.data_proof = mt_->GetProof("txn" + txnid, txnrootlevel, docseq);
+  proof.data_proof.value = doc;
   //std::cout << "height " << level + txnrootlevel << std::endl;
   return proof;
 }
 
-bool SQLLedgerProof::Verify() {
-  std::string target = digest;
-  std::string blk_mt_root;
-  int blocks = 0;
+bool BlockProof::Verify(const std::string& hash, std::string* blk_mt_root) {
+  std::string target = hash;
   for (auto it = blks.rbegin(); it != blks.rend(); ++it) {
     if (Hash::ComputeFrom(*it).ToBase32().compare(target) != 0) {
-      //std::cout << "verification failed at block" << std::endl;
+      return false;
     }
     auto block_info = Utils::splitBy(*it, '|');
     target = block_info[0];
-    blk_mt_root = block_info[1];
-    blocks++;
+    *blk_mt_root = block_info[1];
   }
-  //std::cout << "block " << blks.size() << " " << blocks << std::endl;
+  return true;
+}
 
-  if (blk_mt_root.compare(blk_proof.digest) != 0) {
-    //std::cout << "verification failed at txn mt root" << std::endl;
-  }
-  //std::cout << "txn ";
-  if (!blk_proof.Verify()) {
-    //std::cout << "verification failed at txn tree" << std::endl;
+bool DetailProof::Verify(const std::string& hash) {
+  if (hash.compare(txn_proof.digest) != 0) {
+    return false;
   }
 
-  auto txn_info = Utils::splitBy(blk_proof.value, '|');
+  if (!txn_proof.Verify()) {
+    return false;
+  }
+
+  auto txn_info = Utils::splitBy(txn_proof.value, '|');
   std::string txn_mt_root = txn_info[3];
-  if (txn_mt_root != txn_proof.digest) {
-    //std::cout << "verification failed at row mt root" << std::endl;
+  if (txn_mt_root.compare(txn_proof.digest) != 0) {
+    return false;
   }
-  //std::cout << "row ";
-  return txn_proof.Verify();
+
+  return data_proof.Verify();
 }
 
 Auditor SQLLedger::getAudit(const uint64_t& seq) {

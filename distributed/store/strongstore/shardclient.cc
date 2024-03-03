@@ -388,33 +388,43 @@ ShardClient::GetProofCallback(size_t uid,
 #endif
 #ifdef SQLLEDGER
     res = VerifyStatus::PASS;
-    std::string ledger = "test";
-    auto digest = ledgebase::Hash::FromBase32(reply.digest().hash());
+
     for (int i = 0; i < reply.sproof_size(); ++i) {
-      ledgebase::sqlledger::SQLLedgerProof prover;
       auto curr_proof = reply.sproof(i);
-      prover.digest = curr_proof.digest();
+
+      ledgebase::sqlledger::BlockProof blk_prover;
       for (int j = 0; j < curr_proof.blocks_size(); ++j) {
-        prover.blks.emplace_back(curr_proof.blocks(j));
+        blk_prover.blks.emplace_back(curr_proof.blocks(j));
       }
-      auto blk_proof = curr_proof.blk_proof();
-      prover.blk_proof.digest = blk_proof.digest();
-      prover.blk_proof.value  = blk_proof.value();
-      for (int j = 0; j < blk_proof.proof_size(); ++j) {
-        prover.blk_proof.proof.emplace_back(blk_proof.proof(j));
-        prover.blk_proof.pos.emplace_back(blk_proof.pos(j));
+      std::string txn_hash;
+      if (!blk_prover.Verify(reply.digest().hash(), &txn_hash)) {
+        res = VerifyStatus::FAILED;
+        break;
       }
 
-      auto txn_proof = curr_proof.txn_proof();
-      prover.txn_proof.digest = txn_proof.digest();
-      prover.txn_proof.value  = txn_proof.value();
-      for (int j = 0; j < txn_proof.proof_size(); ++j) {
-        prover.txn_proof.proof.emplace_back(txn_proof.proof(j));
-        prover.txn_proof.pos.emplace_back(txn_proof.pos(j));
-      }
-      
-      if (!prover.Verify()) {
-        res = VerifyStatus::FAILED;
+      for (int j = 0; j < curr_proof.txn_proof_size(); ++j) {
+        ledgebase::sqlledger::DetailProof dtl_prover;
+
+        auto txn_proof = curr_proof.txn_proof(j);
+        dtl_prover.txn_proof.digest = txn_proof.digest();
+        dtl_prover.txn_proof.value  = txn_proof.value();
+        for (int k = 0; k < txn_proof.proof_size(); ++k) {
+          dtl_prover.txn_proof.proof.emplace_back(txn_proof.proof(k));
+          dtl_prover.txn_proof.pos.emplace_back(txn_proof.pos(k));
+        }
+
+        auto data_proof = curr_proof.data_proof(j);
+        dtl_prover.data_proof.digest = data_proof.digest();
+        dtl_prover.data_proof.value  = data_proof.value();
+        for (int k = 0; k < data_proof.proof_size(); ++k) {
+          dtl_prover.data_proof.proof.emplace_back(data_proof.proof(k));
+          dtl_prover.data_proof.pos.emplace_back(data_proof.pos(k));
+        }
+
+        if (!dtl_prover.Verify(txn_hash)) {
+          res = VerifyStatus::FAILED;
+          break;
+        }
       }
     }
 #endif
